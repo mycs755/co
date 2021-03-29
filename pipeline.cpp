@@ -52,6 +52,7 @@ class simulator{
     void run();
     int clockcycle;
     int stalls;
+    int main_found;
     string instruction_fetch(int n);
     int * instruction_drf(string s);
     int is_there_datahazard(int n);
@@ -74,6 +75,7 @@ void simulator::run(){
     position_of_element_in_memory=0;
     
    // value_of_registers[2]=10;
+   main_found=-1;
     int data_found=-1;
     int text_found=-1;
     for(int i=0;i<number_of_instructions;i++){
@@ -125,11 +127,15 @@ void simulator::run(){
             }
         }
      }   
-    
+   // int main_found=3;
     for(int k=text_found+1;k<number_of_instructions;k++){
         int x=-1;
         string s = program[k];
         RemoveSpaces(s);
+        if(s=="main:"){
+            main_found=k;
+        }
+        cout<<main_found<<"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMM,,,,,,,,,,,,,,,,,,"<<endl;
          x = s.find(":");
         string label_name;
         labels l;
@@ -142,9 +148,7 @@ void simulator::run(){
         
     }
     pc=text_found+2;//extra
-    for(int l=0;l<labels_in_program.size();l++){
-        cout<<labels_in_program[l].label<<endl;
-    }
+
    // cout<<pc<<"////////////////////////////////////////////////////"<<endl;
     cout<<"number of instructions"<<number_of_instructions<<endl; 
     while(pc<number_of_instructions){
@@ -173,7 +177,7 @@ void simulator::run(){
         idrf_regs = instruction_drf(ifs);
         cout<<"kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk"<<endl;
         int type_of_operation = idrf_regs[3];
-        bool is_there_datahazard(pc-1);
+       // bool is_there_datahazard(pc-main_found);
 
         int exe_val = instruction_execute(type_of_operation);
         int mem_val = instruction_memory(exe_val,type_of_operation);
@@ -186,18 +190,23 @@ void simulator::run(){
 }
 
 int simulator::is_there_datahazard(int n){
-    if(n==0){
+    cout<<"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"<<n<<endl;
+    if(n==1){
+        cout<<"hhhhhhhhhhhhhhh111111111111111111111"<<endl;
         return -100;
     }
-   else if(n==1){
+   else if(n==2){
         int reg_src1_pres = each_instruction_info[each_instruction_info.size()-1].r2;
         int reg_src2_pres = each_instruction_info[each_instruction_info.size()-1].r3;
         int reg_dest_prev = each_instruction_info[each_instruction_info.size()-2].r1;
 
+
         if(reg_src2_pres == reg_dest_prev || reg_src1_pres == reg_dest_prev){
+             cout<<"hhhhhhhhhhhhhhh22222222222222222"<<endl;
             return 1;
         }
         else{
+             cout<<"hhhhhhhhhhhhhhh22222222222222222"<<endl;
             return -100;
         }
     }
@@ -207,9 +216,11 @@ int simulator::is_there_datahazard(int n){
         int reg_dest_prev = each_instruction_info[each_instruction_info.size()-2].r1;
         int reg_dest_prev_prev = each_instruction_info[each_instruction_info.size()-3].r1;
          if(reg_src2_pres == reg_dest_prev || reg_src1_pres == reg_dest_prev || reg_src2_pres == reg_dest_prev_prev || reg_src1_pres == reg_dest_prev_prev){
+            cout<<"hhhhhhhhhhhhhhh3333333333"<<endl;
             return 2;
         }
         else{
+             cout<<"hhhhhhhhhhhhhhh3333333333"<<endl;
             return -100;
         }
     }
@@ -393,7 +404,7 @@ int simulator::instruction_execute(int n){
 
      int execute_stage_value=-111;
     
-        if(is_there_datahazard(pc-1)==1){
+        if(is_there_datahazard(pc-main_found-1)==1){
         clockcycles_with_stalls.push_back(clockcycle+1);
          clockcycles_with_stalls.push_back(clockcycle+2);
          clockcycles_with_stalls.push_back(clockcycle+3);
@@ -401,13 +412,13 @@ int simulator::instruction_execute(int n){
          total_stalls=total_stalls+3;
            
         }
-        else if(is_there_datahazard(pc-1)==2){
+        else if(is_there_datahazard(pc-main_found-1)==2){
          clockcycles_with_stalls.push_back(clockcycle+1);
          clockcycles_with_stalls.push_back(clockcycle+2);
         clockcycle=clockcycle+2;
          total_stalls=total_stalls+2;
         }
-        else if(is_there_datahazard(pc-1)==-100){
+        else if(is_there_datahazard(pc-main_found-1)==-100){
             clockcycle=clockcycle+0;
         }
 
@@ -701,6 +712,8 @@ void simulator::display(){
          cout<<registers[i]<<"  "<<value_of_registers[i]<<endl;
      }
      cout<<"stalls in program"<<total_stalls;
+
+     
 }
 
 int main(){
