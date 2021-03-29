@@ -197,8 +197,11 @@ int simulator::is_there_datahazard(int n){
     }
    else if(n==2){
         int reg_src1_pres = each_instruction_info[each_instruction_info.size()-1].r2;
+        cout<<"present"<<reg_src1_pres<<endl;
         int reg_src2_pres = each_instruction_info[each_instruction_info.size()-1].r3;
+        cout<<"present"<<reg_src2_pres<<endl;
         int reg_dest_prev = each_instruction_info[each_instruction_info.size()-2].r1;
+        cout<<"present"<<reg_dest_prev<<endl;
 
 
         if(reg_src2_pres == reg_dest_prev || reg_src1_pres == reg_dest_prev){
@@ -212,9 +215,13 @@ int simulator::is_there_datahazard(int n){
     }
     else{
         int reg_src1_pres = each_instruction_info[each_instruction_info.size()-1].r2;
+        cout<<"present"<<reg_src1_pres<<endl;
         int reg_src2_pres = each_instruction_info[each_instruction_info.size()-1].r3;
+        cout<<"present"<<reg_src2_pres<<endl;
         int reg_dest_prev = each_instruction_info[each_instruction_info.size()-2].r1;
+        cout<<"present"<<reg_dest_prev<<endl;
         int reg_dest_prev_prev = each_instruction_info[each_instruction_info.size()-3].r1;
+        cout<<"present"<<reg_dest_prev_prev<<endl;
          if(reg_src2_pres == reg_dest_prev || reg_src1_pres == reg_dest_prev || reg_src2_pres == reg_dest_prev_prev || reg_src1_pres == reg_dest_prev_prev){
             cout<<"hhhhhhhhhhhhhhh3333333333"<<endl;
             return 2;
@@ -267,21 +274,22 @@ string simulator::instruction_fetch(int n){
 }
 
 int * simulator::instruction_drf(string s){
-    RemoveSpaces(s);
+    //RemoveSpaces(s);
     cout<<s<<"[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["<<endl;
    // present_instruction=s;
     registers_of_each_instruction r;  ////////////////
     int count=0;
     int size_of_operation;
-    cout<<s<<"jjjjjjjjjjjjjjjjjjjjjjjjj"<<endl;
+    string s1=program[pc-1];/////////////////////////
+    cout<<s1<<"jjjjjjjjjjjjjjjjjjjjjjjjj"<<endl;
     for(int i=0;i<4;i++){
-        if(s[i]==' '|| s[i]=='\t')
+        if(s1[i]==' '|| s1[i]=='\t')
 		{
 			break;
 		}
         count++;
     }
-    string operation =s.substr(0,count);
+    string operation =s1.substr(0,count);
     cout<<operation<<"lllllllllllllllllllllllllllllll"<<endl;
     string registers_in_instruction;
     if(count<s.size()-1)
@@ -402,8 +410,9 @@ void simulator::instruction_writeback(int m,int n){
 int simulator::instruction_execute(int n){
     cout<<n<<"executeexecute"<<endl;
 
-     int execute_stage_value=-111;
-    
+      int execute_stage_value=-111;
+        if(data_forwarding_enabled==false){
+            cout<<"ddddaaaaaaaaatttttaaaaaa"<<is_there_datahazard(pc-main_found-1)<<endl;
         if(is_there_datahazard(pc-main_found-1)==1){
         clockcycles_with_stalls.push_back(clockcycle+1);
          clockcycles_with_stalls.push_back(clockcycle+2);
@@ -420,6 +429,10 @@ int simulator::instruction_execute(int n){
         }
         else if(is_there_datahazard(pc-main_found-1)==-100){
             clockcycle=clockcycle+0;
+        }
+        }
+        else{
+             ///////////////////////////fiiiiiiiiiiiiiiiilllllllllllllll
         }
 
      switch(n){
@@ -712,6 +725,7 @@ void simulator::display(){
          cout<<registers[i]<<"  "<<value_of_registers[i]<<endl;
      }
      cout<<"stalls in program"<<total_stalls;
+     cout<<"clockcycles taken"<<clockcycle+3;
 
      
 }
