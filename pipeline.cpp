@@ -34,12 +34,13 @@ class simulator{
     int number_of_instructions;
     string present_instruction;
     int memory_element_values[1000];
+    int total_stalls;
     //void read_instruction(int line_number);
     int registers_in_present_instruction[4];
     string operations_allowed[17]={"add","sub","mul","and","or","nor","slt","addi","andi","ori","slti","lw",
 	"sw","beq","bne","j","la"};
     int pc ;
-    vector<int>clockcycles_with_stalls;
+    vector<int>clockcycles_with_stalls;   //for cck stalls
     bool data_forwarding_enabled;
     int position_of_element_in_memory;
     vector<struct labels>labels_in_program;
@@ -52,8 +53,8 @@ class simulator{
     int clockcycle;
     int stalls;
     string instruction_fetch(int n);
-    void instruction_drf(string s);
-    bool is_there_datahazard(int n);
+    int * instruction_drf(string s);
+    int is_there_datahazard(int n);
     int instruction_execute(int n);
     int instruction_memory(int m,int n);
     void instruction_writeback(int m,int n);
@@ -71,6 +72,7 @@ void simulator::run(){
     clockcycle=1; /////////////////////////////////////////////////////////////
     memory_element_values[1000]={0};
     position_of_element_in_memory=0;
+    
    // value_of_registers[2]=10;
     int data_found=-1;
     int text_found=-1;
@@ -158,6 +160,12 @@ void simulator::run(){
             pc++;
             continue;
         }
+        int is_label=-1;
+        is_label=present_instruction.find(":");
+        if(is_label!=-1){
+            pc++;
+            continue;
+        }
         string ifs = instruction_fetch(pc);
         int* idrf_regs;
         idrf_regs = instruction_drf(ifs);
@@ -215,8 +223,9 @@ simulator::simulator(ifstream& file,bool need){
    
     number_of_instructions=0;
     pc=0;
-    data_forwarding_enabled=need
-    file.open("coo1.s");
+    data_forwarding_enabled=need;
+    total_stalls=0;
+    file.open("pipeline.s");
     if(!file.is_open()){
         cout<<"unable to open file";
     }
@@ -236,16 +245,15 @@ simulator::simulator(ifstream& file,bool need){
 
 string simulator::instruction_fetch(int n){
     string s = program[n];
-    s=RemoveSpaces(s);
+    RemoveSpaces(s);
     pc=pc+1;
     return s;
 }
 
 int * simulator::instruction_drf(string s){
     RemoveSpaces(s);
-    int is_label=-1;
-    is_label=present_instruction.find(":");
-    registers_of_each_instruction r;
+    
+    registers_of_each_instruction r;  ////////////////
     int count=0;
     int size_of_operation;
 
@@ -268,16 +276,15 @@ int * simulator::instruction_drf(string s){
             break;
         }
     }
-    if(is_label==-1){
     
     if(position_in_array==-1){
         cout<<"invalid-operation";
         registers_in_present_instruction[4]={-2};
-        r.r1=-2
-        r.r2=-2
-        r.r3=-2
+        r.r1=-2;
+        r.r2=-2;
+        r.r3=-2;
         r.typeo=-2;
-        return registers_in_present_instruction;
+        //return registers_in_present_instruction;
     }
 
     else if(position_in_array<7){
@@ -288,8 +295,8 @@ int * simulator::instruction_drf(string s){
         r.r2=registers_in_present_instruction[1];
         r.r3=registers_in_present_instruction[2];
         r.typeo=registers_in_present_instruction[3];
-        each_instruction_info.pushback(r);
-        return registers_in_present_instruction;
+        each_instruction_info.push_back(r);
+       // return registers_in_present_instruction;
        // execute_present_operation(position_in_array);  //************
     }
     else if(position_in_array<11){
@@ -301,8 +308,8 @@ int * simulator::instruction_drf(string s){
         r.r2=registers_in_present_instruction[1];
         r.r3=registers_in_present_instruction[2];
         r.typeo=registers_in_present_instruction[3];
-        each_instruction_info.pushback(r);
-        return registers_in_present_instruction;
+        each_instruction_info.push_back(r);
+        //return registers_in_present_instruction;
         //execute_present_operation(position_in_array);
     }
     else if(position_in_array<13){
@@ -314,7 +321,7 @@ int * simulator::instruction_drf(string s){
         r.r3=registers_in_present_instruction[2];
         r.typeo=registers_in_present_instruction[3];
         each_instruction_info.push_back(r);
-        return registers_in_present_instruction;
+       // return registers_in_present_instruction;
        // execute_present_operation(position_in_array);
         //******************************  execute
     }
@@ -327,7 +334,7 @@ int * simulator::instruction_drf(string s){
         r.r3=registers_in_present_instruction[2];
         r.typeo=registers_in_present_instruction[3];
         each_instruction_info.push_back(r);
-        return registers_in_present_instruction;
+       // return registers_in_present_instruction;
        // execute_present_operation(position_in_array);
     }
     else if(position_in_array==15){
@@ -339,7 +346,7 @@ int * simulator::instruction_drf(string s){
         r.r3=registers_in_present_instruction[2];
         r.typeo=registers_in_present_instruction[3];
         each_instruction_info.push_back(r);
-        return registers_in_present_instruction;
+       // return registers_in_present_instruction;
        // execute_present_operation(position_in_array);
     }
     else if(position_in_array==16){
@@ -351,11 +358,10 @@ int * simulator::instruction_drf(string s){
         r.r3=registers_in_present_instruction[2];
         r.typeo=registers_in_present_instruction[3];
         each_instruction_info.push_back(r);
-        return registers_in_present_instruction;
+       // return registers_in_present_instruction;
        // execute_present_operation(position_in_array);
     }
-    }
-
+    return registers_in_present_instruction;  
 }
 
 int simulator::instruction_memory(int m,int n){
@@ -365,9 +371,9 @@ int simulator::instruction_memory(int m,int n){
     else if(n==11){
         return memory_element_values[m];
     }
-    else if(n==12){
+    else{
         return memory_element_values[m];
-    }
+    }         //////////change change
 }
 
 void simulator::instruction_writeback(int m,int n){  
@@ -375,46 +381,56 @@ void simulator::instruction_writeback(int m,int n){
 }
 
 int simulator::instruction_execute(int n){
-     switch(n){
-          if(is_there_datahazard(pc-1)==1){
-             clockcycles_with_stalls.push_back(clockcycle+1);
-             clockcycles_with_stalls.push_back(clockcycle+2);
-             clockcycles_with_stalls.push_back(clockcycle+3);
-            clockcycle=clockcycle+3;
+
+     int execute_stage_value=-111;
+    
+        if(is_there_datahazard(pc-1)==1){
+        clockcycles_with_stalls.push_back(clockcycle+1);
+         clockcycles_with_stalls.push_back(clockcycle+2);
+         clockcycles_with_stalls.push_back(clockcycle+3);
+        clockcycle=clockcycle+3;
+         total_stalls=total_stalls+3;
            
         }
         else if(is_there_datahazard(pc-1)==2){
-            clockcycles_with_stalls.push_back(clockcycle+1);
-             clockcycles_with_stalls.push_back(clockcycle+2);
-            clockcycle=clockcycle+2;
+         clockcycles_with_stalls.push_back(clockcycle+1);
+         clockcycles_with_stalls.push_back(clockcycle+2);
+        clockcycle=clockcycle+2;
+         total_stalls=total_stalls+2;
         }
         else if(is_there_datahazard(pc-1)==-100){
             clockcycle=clockcycle+0;
         }
+
+     switch(n){
+
+        
+
         case 0:
        
-		return value_of_registers[registers_in_present_instruction[1]]+value_of_registers[registers_in_present_instruction[2]]; 
-       
+		//return value_of_registers[registers_in_present_instruction[1]]+value_of_registers[registers_in_present_instruction[2]]; 
+         execute_stage_value=value_of_registers[registers_in_present_instruction[1]]+value_of_registers[registers_in_present_instruction[2]]; 
         break;
         case 1:
         
-		return value_of_registers[registers_in_present_instruction[1]]-value_of_registers[registers_in_present_instruction[2]]; 
+		//return value_of_registers[registers_in_present_instruction[1]]-value_of_registers[registers_in_present_instruction[2]]; 
+         execute_stage_value=value_of_registers[registers_in_present_instruction[1]]-value_of_registers[registers_in_present_instruction[2]]; 
         
         break;
         case 2:
        
-		return value_of_registers[registers_in_present_instruction[1]]*value_of_registers[registers_in_present_instruction[2]]; 
-        
+		//return value_of_registers[registers_in_present_instruction[1]]*value_of_registers[registers_in_present_instruction[2]]; 
+         execute_stage_value=value_of_registers[registers_in_present_instruction[1]]*value_of_registers[registers_in_present_instruction[2]]; 
        break;
         case 3:
         
-		return value_of_registers[registers_in_present_instruction[1]] & value_of_registers[registers_in_present_instruction[2]]; 
-        
+		//return value_of_registers[registers_in_present_instruction[1]] & value_of_registers[registers_in_present_instruction[2]]; 
+         execute_stage_value=value_of_registers[registers_in_present_instruction[1]]&value_of_registers[registers_in_present_instruction[2]]; 
         break;
         case 4:
         
 		return value_of_registers[registers_in_present_instruction[1]]|value_of_registers[registers_in_present_instruction[2]]; 
-        
+         execute_stage_value=value_of_registers[registers_in_present_instruction[1]]|value_of_registers[registers_in_present_instruction[2]]; 
         break;
         case 5:
 
@@ -426,21 +442,24 @@ int simulator::instruction_execute(int n){
            
             cout<<registers_in_present_instruction[0]<<endl;
             cout<<registers_in_present_instruction[2]<<endl;
-            return value_of_registers[registers_in_present_instruction[1]]+registers_in_present_instruction[2];
+          //  return value_of_registers[registers_in_present_instruction[1]]+registers_in_present_instruction[2];
           //  pc++;
+           execute_stage_value=value_of_registers[registers_in_present_instruction[1]]+registers_in_present_instruction[2]; 
             break;
         case 8:
             cout<<registers_in_present_instruction[0]<<endl;
             cout<<registers_in_present_instruction[2]<<endl;
-            return value_of_registers[registers_in_present_instruction[1]] & registers_in_present_instruction[2];
+            //return value_of_registers[registers_in_present_instruction[1]] & registers_in_present_instruction[2];
            // pc++;
+            execute_stage_value=value_of_registers[registers_in_present_instruction[1]]-registers_in_present_instruction[2]; 
             break;
         break;
         case 9:
             cout<<registers_in_present_instruction[0]<<endl;
             cout<<registers_in_present_instruction[2]<<endl;
-            return value_of_registers[registers_in_present_instruction[1]] | registers_in_present_instruction[2];
+           // return value_of_registers[registers_in_present_instruction[1]] | registers_in_present_instruction[2];
            // pc++;
+            execute_stage_value=value_of_registers[registers_in_present_instruction[1]]|registers_in_present_instruction[2]; 
             break;
         break;
         case 10:
@@ -451,9 +470,10 @@ int simulator::instruction_execute(int n){
              cout<<registers_in_present_instruction[0]<<endl;
               cout<<registers_in_present_instruction[1]<<endl;
              cout<<registers_in_present_instruction[2]<<endl;
-             return value_of_registers[registers_in_present_instruction[1]]+registers_in_present_instruction[2]/4;
+           //  return value_of_registers[registers_in_present_instruction[1]]+registers_in_present_instruction[2]/4;
            //  cout<<memory_element_values[value_of_registers[registers_in_present_instruction[1]]+registers_in_present_instruction[2]/4]<<"mmmmmmmmmmmmmmmm"<<endl;
            // pc++;
+            execute_stage_value=value_of_registers[registers_in_present_instruction[1]]+registers_in_present_instruction[2]/4; 
         break;
         case 12:
             
@@ -462,7 +482,7 @@ int simulator::instruction_execute(int n){
              cout<<registers_in_present_instruction[2]<<endl;
              return value_of_registers[registers_in_present_instruction[1]]+registers_in_present_instruction[2]/4;
              //memory_element_values[value_of_registers[registers_in_present_instruction[1]]+registers_in_present_instruction[2]/4]=value_of_registers[registers_in_present_instruction[0]];
-            return 
+            return 222;
           //  pc++; 
         break;
         case 13:
@@ -496,6 +516,7 @@ int simulator::instruction_execute(int n){
 
         break;
     }
+    return execute_stage_value;
 }
 
 void simulator::valid_register(string s,int n){
@@ -665,6 +686,14 @@ void simulator::valid_register(string s,int n){
             cout<<"wrong number of instructions"<<" in valid_register";
         }
 }
+
+void simulator::display(){
+     for(int i=0;i<32;i++){
+         cout<<registers[i]<<"  "<<value_of_registers[i]<<endl;
+     }
+     cout<<"stalls in program"<<total_stalls;
+}
+
 int main(){
     ifstream file;
     bool need;
