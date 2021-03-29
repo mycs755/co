@@ -39,6 +39,8 @@ class simulator{
     string operations_allowed[17]={"add","sub","mul","and","or","nor","slt","addi","andi","ori","slti","lw",
 	"sw","beq","bne","j","la"};
     int pc ;
+    vector<int>clockcycles_with_stalls;
+    bool data_forwarding_enabled;
     int position_of_element_in_memory;
     vector<struct labels>labels_in_program;
     vector<struct memory_elements>memory_used_in_program;
@@ -52,9 +54,12 @@ class simulator{
     string instruction_fetch(int n);
     void instruction_drf(string s);
     bool is_there_datahazard(int n);
+    int instruction_execute(int n);
+    int instruction_memory(int m,int n);
+    void instruction_writeback(int m,int n);
    // void execute_present_operation(int n);  //******************
     void valid_register(string s,int n);
-    simulator(ifstream& file);
+    simulator(ifstream& file,bool need);
 
 };
 
@@ -117,9 +122,6 @@ void simulator::run(){
             memory_element_values[position_of_element_in_memory++]=stoi(intermediate1);
             }
         }
-       // for(int i=0;i<8;i++){
-         //   cout<<memory_element_values[i]<<endl;
-        // }
      }   
     
     for(int k=text_found+1;k<number_of_instructions;k++){
@@ -161,7 +163,10 @@ void simulator::run(){
         idrf_regs = instruction_drf(ifs);
         int type_of_operation = idrf_regs[3];
         bool is_there_datahazard(pc-1);
-        
+
+        int exe_val = instruction_execute(type_of_operation);
+        int mem_val = instruction_memory(exe_val,type_of_operation);
+        instruction_writeback(mem_val,type_of_operation);
 
         clockcycle++;
        // read_instruction(pc);///////////////////////edit here
@@ -169,20 +174,20 @@ void simulator::run(){
     }
 }
 
-bool simulator::is_there_datahazard(int n){
-    if(n==1){
-        return false;
+int simulator::is_there_datahazard(int n){
+    if(n==0){
+        return -100;
     }
-   else if(n==2){
+   else if(n==1){
         int reg_src1_pres = each_instruction_info[each_instruction_info.size()-1].r2;
         int reg_src2_pres = each_instruction_info[each_instruction_info.size()-1].r3;
         int reg_dest_prev = each_instruction_info[each_instruction_info.size()-2].r1;
 
         if(reg_src2_pres == reg_dest_prev || reg_src1_pres == reg_dest_prev){
-            return true;
+            return 1;
         }
         else{
-            return false;
+            return -100;
         }
     }
     else{
@@ -191,10 +196,10 @@ bool simulator::is_there_datahazard(int n){
         int reg_dest_prev = each_instruction_info[each_instruction_info.size()-2].r1;
         int reg_dest_prev_prev = each_instruction_info[each_instruction_info.size()-3].r1;
          if(reg_src2_pres == reg_dest_prev || reg_src1_pres == reg_dest_prev || reg_src2_pres == reg_dest_prev_prev || reg_src1_pres == reg_dest_prev_prev){
-            return true;
+            return 2;
         }
         else{
-            return false;
+            return -100;
         }
     }
     
@@ -206,10 +211,11 @@ void simulator::RemoveSpaces(string &str)
     //return str; 
 }
 
-simulator::simulator(ifstream& file){
+simulator::simulator(ifstream& file,bool need){
    
     number_of_instructions=0;
     pc=0;
+    data_forwarding_enabled=need
     file.open("coo1.s");
     if(!file.is_open()){
         cout<<"unable to open file";
@@ -350,6 +356,146 @@ int * simulator::instruction_drf(string s){
     }
     }
 
+}
+
+int simulator::instruction_memory(int m,int n){
+    if(n>=0 && n<=10){
+        return m;
+    }
+    else if(n==11){
+        return memory_element_values[m];
+    }
+    else if(n==12){
+        return memory_element_values[m];
+    }
+}
+
+void simulator::instruction_writeback(int m,int n){  
+        value_of_registers[registers_in_present_instruction[0]]=m;
+}
+
+int simulator::instruction_execute(int n){
+     switch(n){
+          if(is_there_datahazard(pc-1)==1){
+             clockcycles_with_stalls.push_back(clockcycle+1);
+             clockcycles_with_stalls.push_back(clockcycle+2);
+             clockcycles_with_stalls.push_back(clockcycle+3);
+            clockcycle=clockcycle+3;
+           
+        }
+        else if(is_there_datahazard(pc-1)==2){
+            clockcycles_with_stalls.push_back(clockcycle+1);
+             clockcycles_with_stalls.push_back(clockcycle+2);
+            clockcycle=clockcycle+2;
+        }
+        else if(is_there_datahazard(pc-1)==-100){
+            clockcycle=clockcycle+0;
+        }
+        case 0:
+       
+		return value_of_registers[registers_in_present_instruction[1]]+value_of_registers[registers_in_present_instruction[2]]; 
+       
+        break;
+        case 1:
+        
+		return value_of_registers[registers_in_present_instruction[1]]-value_of_registers[registers_in_present_instruction[2]]; 
+        
+        break;
+        case 2:
+       
+		return value_of_registers[registers_in_present_instruction[1]]*value_of_registers[registers_in_present_instruction[2]]; 
+        
+       break;
+        case 3:
+        
+		return value_of_registers[registers_in_present_instruction[1]] & value_of_registers[registers_in_present_instruction[2]]; 
+        
+        break;
+        case 4:
+        
+		return value_of_registers[registers_in_present_instruction[1]]|value_of_registers[registers_in_present_instruction[2]]; 
+        
+        break;
+        case 5:
+
+        break;  /////////////////////////////////////////////////////////////////////////////////////////////
+        case 6:
+            value_of_registers[registers_in_present_instruction[0]]=value_of_registers[registers_in_present_instruction[1]]<value_of_registers[registers_in_present_instruction[2]];
+        break;
+        case 7:
+           
+            cout<<registers_in_present_instruction[0]<<endl;
+            cout<<registers_in_present_instruction[2]<<endl;
+            return value_of_registers[registers_in_present_instruction[1]]+registers_in_present_instruction[2];
+          //  pc++;
+            break;
+        case 8:
+            cout<<registers_in_present_instruction[0]<<endl;
+            cout<<registers_in_present_instruction[2]<<endl;
+            return value_of_registers[registers_in_present_instruction[1]] & registers_in_present_instruction[2];
+           // pc++;
+            break;
+        break;
+        case 9:
+            cout<<registers_in_present_instruction[0]<<endl;
+            cout<<registers_in_present_instruction[2]<<endl;
+            return value_of_registers[registers_in_present_instruction[1]] | registers_in_present_instruction[2];
+           // pc++;
+            break;
+        break;
+        case 10:
+
+        break;
+        case 11:
+           
+             cout<<registers_in_present_instruction[0]<<endl;
+              cout<<registers_in_present_instruction[1]<<endl;
+             cout<<registers_in_present_instruction[2]<<endl;
+             return value_of_registers[registers_in_present_instruction[1]]+registers_in_present_instruction[2]/4;
+           //  cout<<memory_element_values[value_of_registers[registers_in_present_instruction[1]]+registers_in_present_instruction[2]/4]<<"mmmmmmmmmmmmmmmm"<<endl;
+           // pc++;
+        break;
+        case 12:
+            
+             cout<<registers_in_present_instruction[0]<<endl;
+              cout<<registers_in_present_instruction[1]<<endl;
+             cout<<registers_in_present_instruction[2]<<endl;
+             return value_of_registers[registers_in_present_instruction[1]]+registers_in_present_instruction[2]/4;
+             //memory_element_values[value_of_registers[registers_in_present_instruction[1]]+registers_in_present_instruction[2]/4]=value_of_registers[registers_in_present_instruction[0]];
+            return 
+          //  pc++; 
+        break;
+        case 13:
+            if(value_of_registers[registers_in_present_instruction[0]]==value_of_registers[registers_in_present_instruction[1]]){
+                pc=registers_in_present_instruction[2]+1;
+            }
+            else{
+                pc++;
+            }
+        break;
+        case 14:
+            if(value_of_registers[registers_in_present_instruction[0]]!=value_of_registers[registers_in_present_instruction[1]]){
+                pc=registers_in_present_instruction[2]+1;
+            }
+            else{
+                pc++;
+            }
+        break;
+        case 15:
+            pc = registers_in_present_instruction[0];
+        break;
+        case 16:
+       
+            cout<<registers_in_present_instruction[0]<<endl;
+            cout<<registers_in_present_instruction[1]<<endl;
+            value_of_registers[registers_in_present_instruction[0]]=registers_in_present_instruction[1];
+            cout<<value_of_registers[registers_in_present_instruction[0]]<<endl;
+            pc++;
+        break;
+        case 17:
+
+        break;
+    }
 }
 
 void simulator::valid_register(string s,int n){
@@ -520,5 +666,12 @@ void simulator::valid_register(string s,int n){
         }
 }
 int main(){
+    ifstream file;
+    bool need;
+    cout<<"need data forwarding true/false";
+    cin>>need;
+     simulator s(file,need);
+     s.run();
+     s.display();
     return 0;
 }
