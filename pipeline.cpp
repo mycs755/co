@@ -161,14 +161,17 @@ void simulator::run(){
             continue;
         }
         int is_label=-1;
-        is_label=present_instruction.find(":");
+        is_label=program[pc].find(":");
         if(is_label!=-1){
             pc++;
             continue;
         }
+        cout<<":::::::::::::::::::::::::::::::::::::::::::"<<endl;
         string ifs = instruction_fetch(pc);
+        cout<<";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"<<endl;
         int* idrf_regs;
         idrf_regs = instruction_drf(ifs);
+        cout<<"kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk"<<endl;
         int type_of_operation = idrf_regs[3];
         bool is_there_datahazard(pc-1);
 
@@ -245,30 +248,35 @@ simulator::simulator(ifstream& file,bool need){
 
 string simulator::instruction_fetch(int n){
     string s = program[n];
+    cout<<"ififififififififififififififififififi"<<endl;
     RemoveSpaces(s);
     pc=pc+1;
+    cout<<s<<"JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ"<<endl;
     return s;
 }
 
 int * simulator::instruction_drf(string s){
     RemoveSpaces(s);
-    
+    cout<<s<<"[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["<<endl;
+   // present_instruction=s;
     registers_of_each_instruction r;  ////////////////
     int count=0;
     int size_of_operation;
-
+    cout<<s<<"jjjjjjjjjjjjjjjjjjjjjjjjj"<<endl;
     for(int i=0;i<4;i++){
-        if(present_instruction[i]==' '|| present_instruction[i]=='\t')
+        if(s[i]==' '|| s[i]=='\t')
 		{
 			break;
 		}
         count++;
     }
-    string operation =present_instruction.substr(0,count);
+    string operation =s.substr(0,count);
+    cout<<operation<<"lllllllllllllllllllllllllllllll"<<endl;
     string registers_in_instruction;
-    if(count<present_instruction.size()-1)
-        registers_in_instruction=present_instruction.substr(count+1);
-    RemoveSpaces(registers_in_instruction);    
+    if(count<s.size()-1)
+        registers_in_instruction=s.substr(count+1);
+    RemoveSpaces(registers_in_instruction);  
+    cout<<registers_in_instruction<<"\\\\\\\\\\\\\\\\\\\\\\"<<endl;  
     int position_in_array=-1;
     for(int i=0;i<17;i++){
         if(operation==operations_allowed[i]){
@@ -300,7 +308,7 @@ int * simulator::instruction_drf(string s){
        // execute_present_operation(position_in_array);  //************
     }
     else if(position_in_array<11){
-
+        cout<<"eeeeeeeeeeeeeeeeeeeeellllllllllsssssssssssssssss>>endl;";
         registers_in_present_instruction[4]={0};
         valid_register(registers_in_instruction,10);
         registers_in_present_instruction[3]=position_in_array;
@@ -381,6 +389,7 @@ void simulator::instruction_writeback(int m,int n){
 }
 
 int simulator::instruction_execute(int n){
+    cout<<n<<"executeexecute"<<endl;
 
      int execute_stage_value=-111;
     
