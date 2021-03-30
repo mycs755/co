@@ -25,6 +25,11 @@ struct registers_of_each_instruction{
     int typeo;
 };
 
+struct type_of_offset{
+    int position;
+    int type;
+};
+
 class simulator{
     public:
     string registers[32]={"ze","at","v0","v1","a0","a1","a2","a3","t0","t1","t2","t3","t4","t5","t6",
@@ -47,6 +52,7 @@ class simulator{
     vector<struct memory_elements>memory_used_in_program;
     vector<struct registers_of_each_instruction>each_instruction_info;
     vector<int>all_execute_state_values;
+    vector<struct type_of_offset>lwsw_offset_info;
     void RemoveSpaces(string &str);
     void display();
     void run();
@@ -61,7 +67,7 @@ class simulator{
     void instruction_writeback(int m,int n);
    // void execute_present_operation(int n);  //******************
     void valid_register(string s,int n);
-    simulator(ifstream& file,bool need);
+    simulator(ifstream& file,int need);
 
 };
 
@@ -184,16 +190,17 @@ void simulator::run(){
         instruction_writeback(mem_val,type_of_operation);
 
         clockcycle++;
-       // read_instruction(pc);///////////////////////edit here
-       // break;
     }
 }
 
 int simulator::is_there_datahazard(int n){
     cout<<"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"<<n<<endl;
+    if(data_forwarding_enabled==false){
+        int x1=-2;
     if(n==1){
         cout<<"hhhhhhhhhhhhhhh111111111111111111111"<<endl;
-        return -100;
+       // return -100;
+       x1=-100;
     }
    else if(n==2){
         int reg_src1_pres = each_instruction_info[each_instruction_info.size()-1].r2;
@@ -202,16 +209,44 @@ int simulator::is_there_datahazard(int n){
         cout<<"present"<<reg_src2_pres<<endl;
         int reg_dest_prev = each_instruction_info[each_instruction_info.size()-2].r1;
         cout<<"present"<<reg_dest_prev<<endl;
-
-
+        int reg_pres_type = each_instruction_info[each_instruction_info.size()-1].typeo;
+        int reg_prev_type = each_instruction_info[each_instruction_info.size()-2].typeo;
+       // int x1=-2;
+        if(reg_pres_type==11){
+            
+            int a1=-2;
+            if(lwsw_offset_info[lwsw_offset_info.size()-1].type==1){
+                if(reg_src1_pres==reg_dest_prev){
+                   a1=1;
+                }
+                else
+                a1 = -100;
+            }
+            else{
+            if(reg_src2_pres == reg_dest_prev || reg_src1_pres == reg_dest_prev){
+            a1=1;
+            }
+            else{
+            a1=-100;
+            }
+            }
+            x1=a1; //a1;
+        }
+        else{
+            int a2=-2;
         if(reg_src2_pres == reg_dest_prev || reg_src1_pres == reg_dest_prev){
              cout<<"hhhhhhhhhhhhhhh22222222222222222"<<endl;
-            return 1;
+            //return 1;
+            a2=1;
         }
         else{
              cout<<"hhhhhhhhhhhhhhh22222222222222222"<<endl;
-            return -100;
+           // return -100;
+           a2=-100;
         }
+            x1=a2;
+        }
+       // return x1;
     }
     else{
         int reg_src1_pres = each_instruction_info[each_instruction_info.size()-1].r2;
@@ -222,16 +257,105 @@ int simulator::is_there_datahazard(int n){
         cout<<"present"<<reg_dest_prev<<endl;
         int reg_dest_prev_prev = each_instruction_info[each_instruction_info.size()-3].r1;
         cout<<"present"<<reg_dest_prev_prev<<endl;
-         if(reg_src2_pres == reg_dest_prev || reg_src1_pres == reg_dest_prev || reg_src2_pres == reg_dest_prev_prev || reg_src1_pres == reg_dest_prev_prev){
+         if(reg_src2_pres == reg_dest_prev || reg_src1_pres == reg_dest_prev){
             cout<<"hhhhhhhhhhhhhhh3333333333"<<endl;
-            return 2;
+            //return 1;
+            x1=1;
+        }
+        else if(reg_src2_pres == reg_dest_prev_prev || reg_src1_pres == reg_dest_prev_prev){
+            cout<<"hhhhhhhhhhh333333333222222222"<<endl;
+           // return 2;
+           x1=2;
         }
         else{
              cout<<"hhhhhhhhhhhhhhh3333333333"<<endl;
-            return -100;
+           // return -100;
+           x1=-100;
         }
     }
+      return x1;
+    }
+    else{
+        cout<<"qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"<<endl;
+        int x2=-2;
+    if(n==1){
+        cout<<"HHHHHHHHHHHHHHHHHHHHHH111111111111111111"<<endl;
+        //return -100;
+        x2=0;
+    } 
+    else if(n==2){
+         cout<<"HHHHHHHHHHHHHHHHHHHHHH22222222222222222"<<endl;
+        int reg_src1_pres = each_instruction_info[each_instruction_info.size()-1].r2;
+        cout<<"present"<<reg_src1_pres<<endl;
+        int reg_src2_pres = each_instruction_info[each_instruction_info.size()-1].r3;
+        cout<<"present"<<reg_src2_pres<<endl;
+        int reg_dest_prev = each_instruction_info[each_instruction_info.size()-2].r1;
+        cout<<"present"<<reg_dest_prev<<endl;
+        int reg_pres_type = each_instruction_info[each_instruction_info.size()-1].typeo;
+        int reg_prev_type = each_instruction_info[each_instruction_info.size()-2].typeo;
+       if(reg_dest_prev == reg_src1_pres || reg_dest_prev == reg_src2_pres){
+           if(reg_prev_type==11){
+              // return 1;
+              
+              x2=1;
+           }
+           else if(reg_prev_type==13 || reg_prev_type==14){
+              // return -100;
+              x2=0;
+           }
+           else{
+              // return 0;
+              x2=0;
+           }
+       }
+       else{
+       //return -100;
+       x2=0;
+       }
     
+    }
+    else{
+        int reg_src1_pres = each_instruction_info[each_instruction_info.size()-1].r2;
+        cout<<"present"<<reg_src1_pres<<endl;
+        int reg_src2_pres = each_instruction_info[each_instruction_info.size()-1].r3;
+        cout<<"present"<<reg_src2_pres<<endl;
+        int reg_dest_prev = each_instruction_info[each_instruction_info.size()-2].r1;
+        cout<<"present"<<reg_dest_prev<<endl;
+        int reg_dest_prev_prev = each_instruction_info[each_instruction_info.size()-3].r1;
+        cout<<"present"<<reg_dest_prev_prev<<endl;
+        int reg_pres_type = each_instruction_info[each_instruction_info.size()-1].typeo;
+        int reg_prev_type = each_instruction_info[each_instruction_info.size()-2].typeo;
+        if(reg_src2_pres == reg_dest_prev || reg_src1_pres == reg_dest_prev){
+           // cout<<"hhhhhhhhhhhhhhh3333333333"<<endl;
+           // return 1;
+           if(reg_prev_type==11){
+             //  return 1;
+             x2=1;
+           }
+           else if(reg_prev_type==13 || reg_prev_type==14){
+              // return -100;
+              x2=0;
+           }
+           else{
+              // return 0;
+              x2=0;
+           }
+        }
+        else if(reg_src2_pres == reg_dest_prev_prev || reg_src1_pres == reg_dest_prev_prev){
+            cout<<"hhhhhhhhhhh333333333222222222"<<endl;
+            
+            x2=0;
+          //  return 2;
+        }
+        else{
+            // cout<<"hhhhhhhhhhhhhhh3333333333"<<endl;
+           // return -100;
+           //return -100;
+           x2=0;
+        }
+    }   
+        return x2;
+    }
 }
 
 void simulator::RemoveSpaces(string &str)  
@@ -240,11 +364,16 @@ void simulator::RemoveSpaces(string &str)
     //return str; 
 }
 
-simulator::simulator(ifstream& file,bool need){
+simulator::simulator(ifstream& file,int need){
    
     number_of_instructions=0;
     pc=0;
-    data_forwarding_enabled=need;
+    if(need==1){
+    data_forwarding_enabled=true;
+    }
+    else{
+    data_forwarding_enabled=false;
+    }
     total_stalls=0;
     file.open("pipeline.s");
     if(!file.is_open()){
@@ -414,6 +543,7 @@ int simulator::instruction_execute(int n){
         if(data_forwarding_enabled==false){
             cout<<"ddddaaaaaaaaatttttaaaaaa"<<is_there_datahazard(pc-main_found-1)<<endl;
         if(is_there_datahazard(pc-main_found-1)==1){
+            cout<<"11111111111111111111111111111"<<endl;
         clockcycles_with_stalls.push_back(clockcycle+1);
          clockcycles_with_stalls.push_back(clockcycle+2);
          clockcycles_with_stalls.push_back(clockcycle+3);
@@ -422,6 +552,7 @@ int simulator::instruction_execute(int n){
            
         }
         else if(is_there_datahazard(pc-main_found-1)==2){
+            cout<<"222222222222222222222222222222222"<<endl;
          clockcycles_with_stalls.push_back(clockcycle+1);
          clockcycles_with_stalls.push_back(clockcycle+2);
         clockcycle=clockcycle+2;
@@ -432,7 +563,9 @@ int simulator::instruction_execute(int n){
         }
         }
         else{
-             ///////////////////////////fiiiiiiiiiiiiiiiilllllllllllllll
+          int q1 = is_there_datahazard(pc-main_found-1);
+          clockcycle=clockcycle+q1;
+          total_stalls=total_stalls+q1;
         }
 
      switch(n){
@@ -605,6 +738,7 @@ void simulator::valid_register(string s,int n){
     }
     
     else if(n==12 && x==2){
+        type_of_offset lwsw;
          string s1=tokens[1];
         int offset=-1;
         int x=s1.find("(");
@@ -615,6 +749,9 @@ void simulator::valid_register(string s,int n){
         if(c=='0' || c=='1' || c=='2' || c=='3' || c=='4'|| c=='5' || c=='6' || c=='7' || c=='8' || c=='9'){
            offset=stoi(s1.substr(0,x));
            //cout<<offset<<">>>>>>>>>>>>>>>>>>"<<endl;
+           lwsw.position=pc-1;
+           lwsw.type=1;
+           lwsw_offset_info.push_back(lwsw);
           s2=s1.substr(x+2,z-x-2);
          
         }
@@ -624,7 +761,9 @@ void simulator::valid_register(string s,int n){
             cout<<x<<endl;
             cout<<z<<endl;
             s2=s1.substr(x+2,z-x-2);
-            
+            lwsw.position=pc-1;
+            lwsw.type=1;
+            lwsw_offset_info.push_back(lwsw);
             for(int i=0;i<32;i++){
                 if(s2==registers[i]){
                     offset=value_of_registers[i];
@@ -726,17 +865,18 @@ void simulator::display(){
      }
      cout<<"stalls in program"<<total_stalls;
      cout<<"clockcycles taken"<<clockcycle+3;
-
+    cout<<data_forwarding_enabled<<endl;
      
 }
 
 int main(){
     ifstream file;
-    bool need;
-    cout<<"need data forwarding true/false";
+    int need;
+    cout<<"need data forwarding 1/0";
     cin>>need;
      simulator s(file,need);
      s.run();
      s.display();
+     cout<<need<<endl;
     return 0;
 }
