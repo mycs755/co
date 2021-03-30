@@ -452,8 +452,7 @@ int * simulator::instruction_drf(string s){
         r.r3=registers_in_present_instruction[2];
         r.typeo=registers_in_present_instruction[3];
         each_instruction_info.push_back(r);
-       // return registers_in_present_instruction;
-       // execute_present_operation(position_in_array);  //************
+       
     }
     else if(position_in_array<11){
         cout<<"eeeeeeeeeeeeeeeeeeeeellllllllllsssssssssssssssss>>endl;";
@@ -465,8 +464,7 @@ int * simulator::instruction_drf(string s){
         r.r3=registers_in_present_instruction[2];
         r.typeo=registers_in_present_instruction[3];
         each_instruction_info.push_back(r);
-        //return registers_in_present_instruction;
-        //execute_present_operation(position_in_array);
+        
     }
     else if(position_in_array<13){
         registers_in_present_instruction[4]={0};
@@ -477,9 +475,7 @@ int * simulator::instruction_drf(string s){
         r.r3=registers_in_present_instruction[2];
         r.typeo=registers_in_present_instruction[3];
         each_instruction_info.push_back(r);
-       // return registers_in_present_instruction;
-       // execute_present_operation(position_in_array);
-        //******************************  execute
+       
     }
     else if(position_in_array<15){
         registers_in_present_instruction[4]={0};
@@ -490,8 +486,7 @@ int * simulator::instruction_drf(string s){
         r.r3=registers_in_present_instruction[2];
         r.typeo=registers_in_present_instruction[3];
         each_instruction_info.push_back(r);
-       // return registers_in_present_instruction;
-       // execute_present_operation(position_in_array);
+      
     }
     else if(position_in_array==15){
         registers_in_present_instruction[4]={0};
@@ -502,8 +497,7 @@ int * simulator::instruction_drf(string s){
         r.r3=registers_in_present_instruction[2];
         r.typeo=registers_in_present_instruction[3];
         each_instruction_info.push_back(r);
-       // return registers_in_present_instruction;
-       // execute_present_operation(position_in_array);
+       
     }
     else if(position_in_array==16){
         registers_in_present_instruction[4]={0};
@@ -514,8 +508,7 @@ int * simulator::instruction_drf(string s){
         r.r3=registers_in_present_instruction[2];
         r.typeo=registers_in_present_instruction[3];
         each_instruction_info.push_back(r);
-       // return registers_in_present_instruction;
-       // execute_present_operation(position_in_array);
+      
     }
     return registers_in_present_instruction;  
 }
