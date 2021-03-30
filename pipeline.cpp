@@ -53,6 +53,7 @@ class simulator{
     vector<struct registers_of_each_instruction>each_instruction_info;
     vector<int>all_execute_state_values;
     vector<struct type_of_offset>lwsw_offset_info;
+    vector<string> instructions_with_stalls;
     void RemoveSpaces(string &str);
     void display();
     void run();
@@ -200,7 +201,7 @@ int simulator::is_there_datahazard(int n){
     if(n==1){
         cout<<"hhhhhhhhhhhhhhh111111111111111111111"<<endl;
        // return -100;
-       x1=-100;
+       x1=0;
     }
    else if(n==2){
         int reg_src1_pres = each_instruction_info[each_instruction_info.size()-1].r2;
@@ -214,41 +215,47 @@ int simulator::is_there_datahazard(int n){
        // int x1=-2;
         if(reg_pres_type==11){
             
-            int a1=-2;
             if(lwsw_offset_info[lwsw_offset_info.size()-1].type==1){
                 if(reg_src1_pres==reg_dest_prev){
-                   a1=1;
+                   x1=3;
                 }
                 else
-                a1 = -100;
+                 x1=0;
             }
             else{
             if(reg_src2_pres == reg_dest_prev || reg_src1_pres == reg_dest_prev){
-            a1=1;
+            x1=3;
             }
             else{
-            a1=-100;
+            x1=0;
             }
+            } //a1;
+        }
+        else if(reg_pres_type==13 || reg_pres_type==14){
+            if(each_instruction_info[each_instruction_info.size()-1].r1==reg_dest_prev ||each_instruction_info[each_instruction_info.size()-1].r2==reg_dest_prev ){
+                x1=3;
             }
-            x1=a1; //a1;
+            else{
+                x1=0;
+            }
         }
         else{
-            int a2=-2;
+            
         if(reg_src2_pres == reg_dest_prev || reg_src1_pres == reg_dest_prev){
              cout<<"hhhhhhhhhhhhhhh22222222222222222"<<endl;
             //return 1;
-            a2=1;
+            x1=1;
         }
         else{
              cout<<"hhhhhhhhhhhhhhh22222222222222222"<<endl;
            // return -100;
-           a2=-100;
+           x1=0;
         }
-            x1=a2;
         }
        // return x1;
     }
-    else{
+    
+    else if(n==3){
         int reg_src1_pres = each_instruction_info[each_instruction_info.size()-1].r2;
         cout<<"present"<<reg_src1_pres<<endl;
         int reg_src2_pres = each_instruction_info[each_instruction_info.size()-1].r3;
@@ -257,10 +264,46 @@ int simulator::is_there_datahazard(int n){
         cout<<"present"<<reg_dest_prev<<endl;
         int reg_dest_prev_prev = each_instruction_info[each_instruction_info.size()-3].r1;
         cout<<"present"<<reg_dest_prev_prev<<endl;
+        int reg_pres_type = each_instruction_info[each_instruction_info.size()-1].typeo;
+        if(reg_pres_type==11){
+            if(lwsw_offset_info[lwsw_offset_info.size()-1].type==1){
+                if(reg_src1_pres==reg_dest_prev){
+                   x1=3;
+                }
+                else if(reg_src1_pres==reg_dest_prev_prev){
+                    x1=2;
+                }
+                else
+                 x1=0;
+            }
+            else{
+            if(reg_src2_pres == reg_dest_prev || reg_src1_pres == reg_dest_prev){
+            x1=3;
+            }
+            else if(reg_src2_pres == reg_dest_prev_prev || reg_src1_pres == reg_dest_prev_prev){
+            x1=2;
+            }
+            else{
+            x1=0;
+            }
+        }
+        }
+        else if(reg_pres_type==13 || reg_pres_type==14){
+            if(each_instruction_info[each_instruction_info.size()-1].r1==reg_dest_prev ||each_instruction_info[each_instruction_info.size()-1].r2==reg_dest_prev ){
+                x1=3;
+            }
+            if(each_instruction_info[each_instruction_info.size()-1].r1==reg_dest_prev_prev ||each_instruction_info[each_instruction_info.size()-1].r2==reg_dest_prev_prev ){
+                x1=2;
+            }
+            else{
+                x1=0;
+            }
+        }
+        else{
          if(reg_src2_pres == reg_dest_prev || reg_src1_pres == reg_dest_prev){
             cout<<"hhhhhhhhhhhhhhh3333333333"<<endl;
             //return 1;
-            x1=1;
+            x1=3;
         }
         else if(reg_src2_pres == reg_dest_prev_prev || reg_src1_pres == reg_dest_prev_prev){
             cout<<"hhhhhhhhhhh333333333222222222"<<endl;
@@ -270,8 +313,92 @@ int simulator::is_there_datahazard(int n){
         else{
              cout<<"hhhhhhhhhhhhhhh3333333333"<<endl;
            // return -100;
-           x1=-100;
+           x1=0;
         }
+        }
+    }
+    else{
+        cout<<"}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}"<<endl;
+        int reg_src1_pres = each_instruction_info[each_instruction_info.size()-1].r2;
+        cout<<"present"<<reg_src1_pres<<endl;
+        int reg_src2_pres = each_instruction_info[each_instruction_info.size()-1].r3;
+        cout<<"present"<<reg_src2_pres<<endl;
+        int reg_dest_prev = each_instruction_info[each_instruction_info.size()-2].r1;
+        cout<<"present"<<reg_dest_prev<<endl;
+        int reg_dest_prev_prev = each_instruction_info[each_instruction_info.size()-3].r1;
+        cout<<"present"<<reg_dest_prev_prev<<endl;
+        int reg_dest_prev_prev_prev = each_instruction_info[each_instruction_info.size()-4].r1;
+        int reg_pres_type = each_instruction_info[each_instruction_info.size()-1].typeo;
+
+        if(reg_pres_type==11){
+            cout<<"IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII"<<endl;
+            if(lwsw_offset_info[lwsw_offset_info.size()-1].type==1){
+                cout<<"EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"<<endl;
+                if(reg_src1_pres==reg_dest_prev){
+                   x1=3;
+                }
+                else if(reg_src1_pres==reg_dest_prev_prev){
+                    x1=2;
+                }
+                else if(reg_src1_pres==reg_dest_prev_prev_prev){
+                    x1=1;
+                }
+                else
+                 x1=0;
+            }
+            else{
+                cout<<"iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii"<<endl;
+            if(reg_src2_pres == reg_dest_prev || reg_src1_pres == reg_dest_prev){
+            x1=3;
+            }
+            else if(reg_src2_pres == reg_dest_prev_prev || reg_src1_pres == reg_dest_prev_prev){
+            x1=2;
+            }
+            else if(reg_src2_pres == reg_dest_prev_prev_prev || reg_src1_pres == reg_dest_prev_prev_prev){
+            x1=1;
+            }
+            else{
+            x1=0;
+            }
+        }
+        }
+        else if(reg_pres_type==13 || reg_pres_type==14){
+            if(each_instruction_info[each_instruction_info.size()-1].r1==reg_dest_prev ||each_instruction_info[each_instruction_info.size()-1].r2==reg_dest_prev ){
+                x1=3;
+            }
+            if(each_instruction_info[each_instruction_info.size()-1].r1==reg_dest_prev_prev ||each_instruction_info[each_instruction_info.size()-1].r2==reg_dest_prev_prev ){
+                x1=2;
+            }
+            else if(each_instruction_info[each_instruction_info.size()-1].r1==reg_dest_prev_prev_prev ||each_instruction_info[each_instruction_info.size()-1].r2==reg_dest_prev_prev_prev){
+                x1=1;
+            }
+            else{
+                x1=0;
+            }
+        }
+        else{
+         if(reg_src2_pres == reg_dest_prev || reg_src1_pres == reg_dest_prev){
+            cout<<"hhhhhhhhhhhhhhh3333333333"<<endl;
+            //return 1;
+            x1=3;
+        }
+        else if(reg_src2_pres == reg_dest_prev_prev || reg_src1_pres == reg_dest_prev_prev){
+            cout<<"hhhhhhhhhhh333333333222222222"<<endl;
+           // return 2;
+           x1=2;
+        }
+        else if(reg_src2_pres == reg_dest_prev_prev_prev || reg_src1_pres == reg_dest_prev_prev_prev){
+            cout<<"hhhhhhhhhhh333333333222222222"<<endl;
+           // return 2;
+           x1=1;
+        }
+        else{
+             cout<<"hhhhhhhhhhhhhhh3333333333"<<endl;
+           // return -100;
+           x1=0;
+        }
+        }
+
     }
       return x1;
     }
@@ -293,23 +420,28 @@ int simulator::is_there_datahazard(int n){
         cout<<"present"<<reg_dest_prev<<endl;
         int reg_pres_type = each_instruction_info[each_instruction_info.size()-1].typeo;
         int reg_prev_type = each_instruction_info[each_instruction_info.size()-2].typeo;
+        if(reg_pres_type==13 || reg_pres_type==14){
+            if(each_instruction_info[each_instruction_info.size()-1].r1==reg_dest_prev ||each_instruction_info[each_instruction_info.size()-1].r2==reg_dest_prev ){
+                if(each_instruction_info[each_instruction_info.size()-2].typeo==11||each_instruction_info[each_instruction_info.size()-2].typeo==12){
+                    x2=1;
+                }
+                else{
+                    x2=0;
+                }
+            }
+            else{
+                x2=0;
+            }
+        }
        if(reg_dest_prev == reg_src1_pres || reg_dest_prev == reg_src2_pres){
            if(reg_prev_type==11){
-              // return 1;
-              
               x2=1;
            }
-           else if(reg_prev_type==13 || reg_prev_type==14){
-              // return -100;
-              x2=0;
-           }
            else{
-              // return 0;
               x2=0;
            }
        }
        else{
-       //return -100;
        x2=0;
        }
     
@@ -520,8 +652,11 @@ int simulator::instruction_memory(int m,int n){
     else if(n==11){
         return memory_element_values[m];
     }
-    else{
+    else if(n>=12 && n<=15){
         return memory_element_values[m];
+    }
+    else{
+        return m;
     }         //////////change change
 }
 
@@ -535,36 +670,23 @@ int simulator::instruction_execute(int n){
       int execute_stage_value=-111;
         if(data_forwarding_enabled==false){
             cout<<"ddddaaaaaaaaatttttaaaaaa"<<is_there_datahazard(pc-main_found-1)<<endl;
-        if(is_there_datahazard(pc-main_found-1)==1){
-            cout<<"11111111111111111111111111111"<<endl;
-        clockcycles_with_stalls.push_back(clockcycle+1);
-         clockcycles_with_stalls.push_back(clockcycle+2);
-         clockcycles_with_stalls.push_back(clockcycle+3);
-        clockcycle=clockcycle+3;
-         total_stalls=total_stalls+3;
-           
-        }
-        else if(is_there_datahazard(pc-main_found-1)==2){
-            cout<<"222222222222222222222222222222222"<<endl;
-         clockcycles_with_stalls.push_back(clockcycle+1);
-         clockcycles_with_stalls.push_back(clockcycle+2);
-        clockcycle=clockcycle+2;
-         total_stalls=total_stalls+2;
-        }
-        else if(is_there_datahazard(pc-main_found-1)==-100){
-            clockcycle=clockcycle+0;
-        }
+        int q2 = is_there_datahazard(pc-main_found-1);
+        if(q2!=0){
+              instructions_with_stalls.push_back(program[pc-1]);
+          }
+          clockcycle=clockcycle+q2;
+          total_stalls=total_stalls+q2;
         }
         else{
           int q1 = is_there_datahazard(pc-main_found-1);
+          if(q1!=0){
+              instructions_with_stalls.push_back(program[pc-1]);
+          }
           clockcycle=clockcycle+q1;
           total_stalls=total_stalls+q1;
         }
 
      switch(n){
-
-        
-
         case 0:
        
 		//return value_of_registers[registers_in_present_instruction[1]]+value_of_registers[registers_in_present_instruction[2]]; 
@@ -667,9 +789,10 @@ int simulator::instruction_execute(int n){
        
             cout<<registers_in_present_instruction[0]<<endl;
             cout<<registers_in_present_instruction[1]<<endl;
-            value_of_registers[registers_in_present_instruction[0]]=registers_in_present_instruction[1];
-            cout<<value_of_registers[registers_in_present_instruction[0]]<<endl;
-            pc++;
+           // value_of_registers[registers_in_present_instruction[0]]=registers_in_present_instruction[1];
+            //cout<<value_of_registers[registers_in_present_instruction[0]]<<endl;
+            //pc++;
+            return registers_in_present_instruction[1];
         break;
         case 17:
 
@@ -753,19 +876,21 @@ void simulator::valid_register(string s,int n){
             cout<<s1<<endl;
             cout<<x<<endl;
             cout<<z<<endl;
-            s2=s1.substr(x+2,z-x-2);
+           // s2=s1.substr(x+2,z-x-2);
+           s2=s1.substr(0,2);
+            cout<<s2<<"ssssssss22222222"<<endl;
             lwsw.position=pc-1;
-            lwsw.type=1;
+            lwsw.type=0;
             lwsw_offset_info.push_back(lwsw);
             for(int i=0;i<32;i++){
                 if(s2==registers[i]){
                     offset=value_of_registers[i];
-                   // cout<<offset<<"??????????????????????"<<endl;
+                   cout<<offset<<"??????????????????????"<<endl;
                     break;
                 }
             }
         } 
-       // string s2 = s1.substr(x+2,z-x-2);
+        string s3 = s1.substr(x+2,z-x-2);
         for(int i=0;i<32;i++){
             if(registers[i]==tokens[0]){
                 registers_in_present_instruction[0]=i;
@@ -773,7 +898,7 @@ void simulator::valid_register(string s,int n){
             }
         }
         for(int i=0;i<32;i++){
-            if(registers[i]==s2){
+            if(registers[i]==s3){
                 registers_in_present_instruction[1]=i;
                 y++;
             }
@@ -859,6 +984,10 @@ void simulator::display(){
      cout<<"stalls in program"<<total_stalls;
      cout<<"clockcycles taken"<<clockcycle+3;
     cout<<data_forwarding_enabled<<endl;
+    cout<<"......................................."<<endl;
+    for(int b=0;b<instructions_with_stalls.size();b++){
+        cout<<instructions_with_stalls[b]<<endl;
+    }
      
 }
 
