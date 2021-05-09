@@ -33,20 +33,14 @@ struct type_of_offset{
 
 class Block{
     public:
-    //private:
-    //char data[blocksize];
-    //int data;    ___________________________________________________________________
     int *data;
-    //int64_t tag;
     string tag;
     bool dirty;
     int lru;
-    //int req_data_position_in_block;
     Block();
 };
 Block::Block(){
     tag = "NULL";
-   // data = INT_MIN;  ________________________________________________
     dirty = false;
     lru = 0;
 }
@@ -59,43 +53,19 @@ class Set{
     int level_set_offset_size;
     int req_block_no_in_set_in_level;
     
-   // Block * find_block_in_set_level(string s3,Set ss,string addr);
    int find_block_in_set_level(string s3,Set ss,string addr);
     private:
     int num_of_blocks_in_set_level;
-   // int num_of_blocks_in_set_level2;
 };
-/*Block * Set::find_block_in_set_level(string s3,Set ss,string addr){
-   // string level1_tag_str = addr.substr(0,c1.level1_offset_size-c1.level1_index_size);
-   cout<<"find block function"<<endl;
-   cout<<s3<<endl;
-   cout<<"sssssssssssssyyyyyyyyyyyyyooooooooooooooo"<<endl;
-    for(int i=0;i<ss.getnum_of_blocks_in_set_level();i++){
-        cout<<ss.blocks_level[i].tag<<endl;
-        if(s3 == ss.blocks_level[i].tag){
-            cout<<"yyyyyyyyyyyyyyyyyeeeeeeeeeeeeeeessssssssssssssss"<<endl;
-            req_block_no_in_set_in_level = i;
-            return &blocks_level[i];
-        }
-    }
-    return nullptr;
-}*/
-
 int Set::find_block_in_set_level(string s3,Set ss,string addr){
-   // string level1_tag_str = addr.substr(0,c1.level1_offset_size-c1.level1_index_size);
-   cout<<"find block function"<<endl;
-   cout<<s3<<endl;
-   cout<<"sssssssssssssyyyyyyyyyyyyyooooooooooooooo"<<endl;
     for(int i=0;i<ss.getnum_of_blocks_in_set_level();i++){
-        cout<<ss.blocks_level[i].tag<<endl;
+      //  cout<<ss.blocks_level[i].tag<<endl;
         if(s3 == ss.blocks_level[i].tag){
-            cout<<"yyyyyyyyyyyyyyyyyeeeeeeeeeeeeeeessssssssssssssss"<<endl;
+         //  cout<<"yyyyyyyyyyyyyyyyyeeeeeeeeeeeeeeessssssssssssssss"<<endl;
             req_block_no_in_set_in_level = i;
-            //return &blocks_level[i];
             return i;
         }
     }
-   // return nullptr;
    return -1;
 }
 int Set::getnum_of_blocks_in_set_level(){
@@ -110,19 +80,16 @@ class Cache{
     Set *sets_level;
     int level_index_size;
     int level_offset_size;
-  //  int bits_for_index;
-  //  int bits_for_offset;
     void setnum_of_sets_in_cache_level(int x);
     int getnum_of_sets_in_cache_level();
     int access_level(Cache c,string addr);
     int req_set_index_level(Cache c,string addr);
     req_data_position_in_block(Cache c,string addr);
+   // write_back_to_main_memory(Cache c);
     string level_index_str;
     string level_offset_str;
-   // int req_data_position_in_block;
     private:
     int num_of_sets_in_cache_level;
-   //  int num_of_sets_in_cache_level2;
 };
 Cache design_level_cache(int cache_size,int block_size,int assosciativity){
     Cache level_cache;
@@ -148,34 +115,24 @@ Cache design_level_cache(int cache_size,int block_size,int assosciativity){
 int Cache::req_set_index_level(Cache c,string addr){
     ///////////////////////////////// to get set index
     c.level_index_str = addr.substr(13-(int)log2(c.level_offset_size)-(int)log2(c.level_index_size),(int)log2(c.level_index_size));
-   cout<<c.level_index_str<<"ooooooooofffffffssssssseeeeeeetttttttsssssssstttttrrrrrrr"<<endl;
+  // cout<<c.level_index_str<<"ooooooooofffffffssssssseeeeeeetttttttsssssssstttttrrrrrrr"<<endl;
     int set_index_required = stoi(c.level_index_str,nullptr,2);
-    cout<<set_index_required<<endl;
+   // cout<<set_index_required<<endl;
     return set_index_required;
 }
 int Cache::req_data_position_in_block(Cache c,string addr){
-     c.level_offset_str = addr.substr(13-(int)log2(c.level_offset_size),(int)log2(c.level_offset_size));
-   cout<<c.level_offset_str<<"ooooooooofffffffssssssseeeeeeetttttttsssssssstttttrrrrrrr"<<endl;
+    c.level_offset_str = addr.substr(13-(int)log2(c.level_offset_size),(int)log2(c.level_offset_size));
+    //cout<<c.level_offset_str<<"ooooooooofffffffssssssseeeeeeetttttttsssssssstttttrrrrrrr"<<endl;
     int yy = stoi(c.level_offset_str,nullptr,2);
     return yy;
 }
 int Cache::access_level(Cache c,string addr){
-   // int req_set = req_set_index(addr);  //////////////
-   
-    cout<<"111111111111111111111111111111111111111111111112222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222"<<endl;
     int req_set = req_set_index_level(c,addr);
     string level_block_tag = addr.substr(0,13-((int)log2(c.level_offset_size)+(int)log2(c.level_index_size)));
-    cout<<level_block_tag<<"                "<<";;;;;;;;;;;;;;;;;;;;;"<<endl;
-    //Block *req_block = sets_level[req_set].find_block_in_set_level(level_block_tag,sets_level[req_set],addr);
     int req_block = sets_level[req_set].find_block_in_set_level(level_block_tag,sets_level[req_set],addr);
     if(req_block!=-1){
-       // return req_block->data[0];
     c.level_offset_str = addr.substr(13-(int)log2(c.level_offset_size),(int)log2(c.level_offset_size));
     int data_index_in_block_req = stoi(c.level_offset_str,nullptr,2);
-  //  c.req_data_position_in_block = data_index_in_block_req;
-   // c.bits_for_offset = level_offset_str.length();
-  // c.sets_level[req_set].blocks_level[]
-   // return req_block->data[data_index_in_block_req];
    return c.sets_level[req_set].blocks_level[req_block].data[data_index_in_block_req];
     }
     return INT_MAX;
@@ -189,10 +146,10 @@ void Cache::setnum_of_sets_in_cache_level(int x){
 
 void display_cache_level(Cache c){
     cout<<c.getnum_of_sets_in_cache_level()<<endl;
-    cout<<c.level_index_size<<endl;
+   cout<<c.level_index_size<<endl;
     cout<<c.level_offset_size<<endl;
     for(int i=0;i<c.level_index_size;i++){
-        for(int j=0;j<c.level_offset_size;j++){
+        for(int j=0;j<c.sets_level[i].getnum_of_blocks_in_set_level();j++){
             cout<<"tag"<<c.sets_level[i].blocks_level[j].tag<<endl;
             cout<<"lru"<<c.sets_level[i].blocks_level[j].lru<<endl;
             for(int k=0;k<c.level_offset_size;k++){
@@ -203,10 +160,45 @@ void display_cache_level(Cache c){
     }
 }
 
+string bin(long n)
+  {
+    long i;
+    string s;
+    s=s+"0";
+    for (i = 1 << 30; i > 0; i = i / 2)
+    {
+      if((n & i) != 0)
+      {
+        s=s+"1";
+      }
+      else
+      {
+        s=s+"0";
+      }
+    }
+    return s;
+  }
+
+void write_back_to_main_memory(Cache c,int *memo){
+    for(int i=0;i<c.level_index_size;i++){
+        for(int j=0;j<c.sets_level[i].getnum_of_blocks_in_set_level();j++){
+             if(c.sets_level[i].blocks_level[j].dirty==1){
+                for(int k=0;k<c.level_offset_size;k++){
+                    int yy = (int)log2(c.level_offset_size);
+                    string ss1 = bin(j).substr(32-(yy+1),yy+1);
+                    int xx = 13-((int)log2(c.level_offset_size))-(c.sets_level[i].blocks_level[j].tag.length());
+                    string ss2 = bin(i).substr(32-(xx+1),xx+1);
+                    string to_be_replaced_address = c.sets_level[i].blocks_level[j].tag+ss2+ss1;
+                    int qq = stoi(to_be_replaced_address,nullptr,2);
+                    memo[qq] = c.sets_level[i].blocks_level[j].data[k];
+                }
+            cout<<"-----------------"<<endl;
+             }
+        }
+    }
+}
+
 //;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-//;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-//;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-//;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 class simulator{
     public:
@@ -218,7 +210,6 @@ class simulator{
     string present_instruction;
     int memory_element_values[1000];
     int total_stalls;
-    //void read_instruction(int line_number);
     int registers_in_present_instruction[4];
     string operations_allowed[17]={"add","sub","mul","and","or","nor","slt","addi","andi","ori","slti","lw",
 	"sw","beq","bne","j","la"};
@@ -232,6 +223,8 @@ class simulator{
     vector<int>all_execute_state_values;
     vector<struct type_of_offset>lwsw_offset_info;
     vector<string> instructions_with_stalls;
+    int number_of_labels_found;
+    int number_of_instructions_executed;
     void RemoveSpaces(string &str);
     void display();
     void run();
@@ -240,6 +233,11 @@ class simulator{
     int main_found;
     int lru1;
     int lru2;
+    int level1_cache_latency;
+    int level2_cache_latency;
+    int main_mem_latency;
+    int hit;
+    int lwsw_ins;
     ////////////////////////////////
     Cache sim_level1;
     Cache sim_level2;
@@ -251,27 +249,26 @@ class simulator{
     int instruction_execute(int n);
     int instruction_memory(int m,int n);
     void instruction_writeback(int m,int n);
-   // void execute_present_operation(int n);  //******************
     void valid_register(string s,int n);
-    simulator(ifstream& file,int need,Cache level1,Cache level2,int b1,int b2);
+    simulator(ifstream& file,int need,Cache level1,Cache level2,int b1,int b2,int lca1,int lca2,int mma);
 
 };
 
 void simulator::run(){
-    //value_of_registers[32]={0};
-    for(int i=0;i<32;i++){
+    for(int i=0;i<32;i++){  // initializing all reister values to 0
         value_of_registers[i]=0;
     }
     clockcycle=1; /////////////////////////////////////////////////////////////
     memory_element_values[1000]={0};
     position_of_element_in_memory=0;
+    hit = 0;
+    lwsw_ins = 0;
     lru1=0;
     lru2=0;
-   // value_of_registers[2]=10;
    main_found=-1;
     int data_found=-1;
     int text_found=-1;
-    for(int i=0;i<number_of_instructions;i++){
+    for(int i=0;i<number_of_instructions;i++){ // to find .data
         string s=program[i];
         RemoveSpaces(s);
         if(s==".data"){
@@ -282,7 +279,7 @@ void simulator::run(){
     if(data_found==-1){
         cout<<"error as .data is not found";
     }
-    for(int j=data_found+1;j<number_of_instructions;j++){
+    for(int j=data_found+1;j<number_of_instructions;j++){ // to find .text
         string s=program[j];
         RemoveSpaces(s);
         if(s==".text"){
@@ -304,7 +301,7 @@ void simulator::run(){
         
          string list_name;
          memory_elements m;
-        
+        // storing the word data in vector memory used i program with its name,start address,
          if(x!=-1 && x!=0){
             list_name=s.substr(0,x);
             
@@ -314,21 +311,19 @@ void simulator::run(){
             string s1=s.substr(x+6);
             stringstream commas(s1);
             string intermediate1;
-            while(getline(commas,intermediate1,',')){
+            while(getline(commas,intermediate1,',')){ // storing the values in memoryelement values array
           
             memory_element_values[position_of_element_in_memory++]=stoi(intermediate1);
             }
         }
      }   
-   // int main_found=3;
-    for(int k=text_found+1;k<number_of_instructions;k++){
+    for(int k=text_found+1;k<number_of_instructions;k++){ // reading the instructions
         int x=-1;
         string s = program[k];
         RemoveSpaces(s);
-        if(s=="main:"){
+        if(s=="main:"){ // finding main
             main_found=k;
         }
-       // cout<<main_found<<"MMMMMMMMMMMMMMMMMMMMMMMMMMMMMM,,,,,,,,,,,,,,,,,,"<<endl;
          x = s.find(":");
         string label_name;
         labels l;
@@ -337,20 +332,15 @@ void simulator::run(){
             l.label=label_name;
             l.line_number_of_label=k;
             labels_in_program.push_back(l);
-        }
-        
+        }    
     }
     pc=text_found+2;//extra
-
-   // cout<<pc<<"////////////////////////////////////////////////////"<<endl;
     cout<<"number of instructions"<<number_of_instructions<<endl; 
-    while(pc<number_of_instructions){
-       
-        cout<<pc;
+    while(pc<number_of_instructions){ // instructions
+       // cout<<pc;
         string s2=program[pc];
-       
-        RemoveSpaces(s2);
-        if(s2=="stop"){
+        RemoveSpaces(s2);  // to rempve sapces in instructions
+        if(s2=="stop"){ // if stop is encountered terminate the program
             pc=number_of_instructions+1;
         }
         if(s2==""){
@@ -358,53 +348,50 @@ void simulator::run(){
             continue;
         }
         int is_label=-1;
-        is_label=program[pc].find(":");
+        is_label=program[pc].find(":"); // to check whether it is of label type
         if(is_label!=-1){
+            number_of_labels_found++; // increment number of labels found
             pc++;
             continue;
         }
-        cout<<":::::::::::::::::::::::::::::::::::::::::::"<<endl;
-        string ifs = instruction_fetch(pc);
-        cout<<";;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;"<<endl;
+        string ifs = instruction_fetch(pc); // calling instruction fetch
+       number_of_instructions_executed++;
         int* idrf_regs;
-        idrf_regs = instruction_drf(ifs);
-        cout<<"kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk"<<endl;
+        idrf_regs = instruction_drf(ifs);// calling decode register fetch
         int type_of_operation = idrf_regs[3];
-       // bool is_there_datahazard(pc-main_found);
-
-        int exe_val = instruction_execute(type_of_operation);
-        int mem_val = instruction_memory(exe_val,type_of_operation);
-        instruction_writeback(mem_val,type_of_operation);
-        cout<<"++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"<<endl;
-        cout<<"++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"<<endl;
-        display_cache_level(sim_level1);
-        display_cache_level(sim_level2);
-        cout<<"++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"<<endl;
-        cout<<"++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"<<endl;
-        clockcycle++;
+        int exe_val = instruction_execute(type_of_operation); // execute function
+        int mem_val = instruction_memory(exe_val,type_of_operation); // memory function
+        instruction_writeback(mem_val,type_of_operation);  // writebac function
+        clockcycle++; // incrementing clock cycle
+        cout<<"###########################################################################"<<endl;
+        for(int i=0;i<32;i++){
+         cout<<registers[i]<<"  "<<value_of_registers[i]<<endl;
+        }
+        cout<<"##############################################################################"<<endl;
     }
+    // at the end if there is any changes left in cache write back them to main memory
+    write_back_to_main_memory(sim_level1,memory_element_values); 
+    write_back_to_main_memory(sim_level2,memory_element_values);
 }
 
-int simulator::is_there_datahazard(int n){
-    cout<<"hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh"<<n<<endl;
+int simulator::is_there_datahazard(int n){ // for finding hazards
     if(data_forwarding_enabled==false){
         int x1=-2;
-    if(n==1){
-        cout<<"hhhhhhhhhhhhhhh111111111111111111111"<<endl;
-       // return -100;
+    if(n==1){ // if it is first instruction
        x1=0;
     }
-   else if(n==2){
-       cout<<"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"<<endl;
-        int reg_src1_pres = each_instruction_info[each_instruction_info.size()-1].r2;
-        cout<<"present"<<reg_src1_pres<<endl;
-        int reg_src2_pres = each_instruction_info[each_instruction_info.size()-1].r3;
-        cout<<"present"<<reg_src2_pres<<endl;
-        int reg_dest_prev = each_instruction_info[each_instruction_info.size()-2].r1;
-        cout<<"present"<<reg_dest_prev<<endl;
+   else if(n==2){ // second instruction check with the previous
         int reg_pres_type = each_instruction_info[each_instruction_info.size()-1].typeo;
         int reg_prev_type = each_instruction_info[each_instruction_info.size()-2].typeo;
-       // int x1=-2;
+        int reg_src1_pres = each_instruction_info[each_instruction_info.size()-1].r2;
+        int reg_src2_pres = -1;
+       if(reg_pres_type == 13 || reg_pres_type == 14){
+           reg_src2_pres = each_instruction_info[each_instruction_info.size()-1].r1;
+       }
+        else{
+          reg_src2_pres = each_instruction_info[each_instruction_info.size()-1].r3;
+        }
+        int reg_dest_prev = each_instruction_info[each_instruction_info.size()-2].r1;
         if(reg_pres_type==11){
             
             if(lwsw_offset_info[lwsw_offset_info.size()-1].type==1){
@@ -452,7 +439,6 @@ int simulator::is_there_datahazard(int n){
           
         if(reg_src2_pres == reg_dest_prev || reg_src1_pres == reg_dest_prev){
             if(reg_prev_type!=13 && reg_prev_type!=14 && reg_prev_type!=15){
-             cout<<"hhhhhhhhhhhhhhh22222222222222222"<<endl;
             x1=3;
         }
         else{
@@ -462,18 +448,13 @@ int simulator::is_there_datahazard(int n){
         
         else x1=0;
         }
-       // return x1;
     }
     
     else if(n==3){
         int reg_src1_pres = each_instruction_info[each_instruction_info.size()-1].r2;
-        cout<<"present"<<reg_src1_pres<<endl;
         int reg_src2_pres = each_instruction_info[each_instruction_info.size()-1].r3;
-        cout<<"present"<<reg_src2_pres<<endl;
         int reg_dest_prev = each_instruction_info[each_instruction_info.size()-2].r1;
-        cout<<"present"<<reg_dest_prev<<endl;
         int reg_dest_prev_prev = each_instruction_info[each_instruction_info.size()-3].r1;
-        cout<<"present"<<reg_dest_prev_prev<<endl;
         int reg_pres_type = each_instruction_info[each_instruction_info.size()-1].typeo;
         int reg_prev_type = each_instruction_info[each_instruction_info.size()-2].typeo;
         int reg_prev_prev_type = each_instruction_info[each_instruction_info.size()-3].typeo;
@@ -518,9 +499,7 @@ int simulator::is_there_datahazard(int n){
         }
         }
         else if(reg_pres_type==13 || reg_pres_type==14){
-            cout<<">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>"<<endl;
             if(each_instruction_info[each_instruction_info.size()-1].r1==reg_dest_prev ||each_instruction_info[each_instruction_info.size()-1].r2==reg_dest_prev ){
-               cout<<"^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^"<<endl;
                 x1=3+2;
             }
             else if(each_instruction_info[each_instruction_info.size()-1].r1==reg_dest_prev_prev ||each_instruction_info[each_instruction_info.size()-1].r2==reg_dest_prev_prev ){
@@ -533,17 +512,13 @@ int simulator::is_there_datahazard(int n){
         else{
          if(reg_src2_pres == reg_dest_prev || reg_src1_pres == reg_dest_prev){
              if(reg_prev_type!=13 && reg_prev_type!=14 && reg_prev_type!=15){
-            cout<<"hhhhhhhhhhhhhhh3333333333"<<endl;
-            //return 1;
             x1=3;
              }
              else x1=0;
 
         }
         else if(reg_src2_pres == reg_dest_prev_prev || reg_src1_pres == reg_dest_prev_prev){
-            cout<<"YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"<<endl;
             if(reg_prev_prev_type!=13 && reg_prev_prev_type!=14 && reg_prev_prev_type!=15){
-            cout<<"hhhhhhhhhhh333333333222222222"<<endl;
               if(reg_src2_pres==reg_dest_prev_prev){
                   if(reg_src2_pres==reg_src1_prev || reg_src2_pres==reg_src2_prev){
                       x1=0;
@@ -565,22 +540,15 @@ int simulator::is_there_datahazard(int n){
              x1=0;
         }
         else{
-             cout<<"hhhhhhhhhhhhhhh3333333333"<<endl;
-           // return -100;
            x1=0;
         }
         }
     }
     else{
-        cout<<"}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}}"<<endl;
         int reg_src1_pres = each_instruction_info[each_instruction_info.size()-1].r2;
-        cout<<"present"<<reg_src1_pres<<endl;
         int reg_src2_pres = each_instruction_info[each_instruction_info.size()-1].r3;
-        cout<<"present"<<reg_src2_pres<<endl;
         int reg_dest_prev = each_instruction_info[each_instruction_info.size()-2].r1;
-        cout<<"present"<<reg_dest_prev<<endl;
         int reg_dest_prev_prev = each_instruction_info[each_instruction_info.size()-3].r1;
-        cout<<"present"<<reg_dest_prev_prev<<endl;
         int reg_dest_prev_prev_prev = each_instruction_info[each_instruction_info.size()-4].r1;
         int reg_pres_type = each_instruction_info[each_instruction_info.size()-1].typeo;
         int reg_prev_type = each_instruction_info[each_instruction_info.size()-2].typeo;
@@ -591,9 +559,7 @@ int simulator::is_there_datahazard(int n){
         int reg_src1_prev_prev = each_instruction_info[each_instruction_info.size()-3].r2;
         int reg_src2_prev_prev = each_instruction_info[each_instruction_info.size()-3].r3;
         if(reg_pres_type==11){
-            cout<<"IIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIIII"<<endl;
             if(lwsw_offset_info[lwsw_offset_info.size()-1].type==1){
-                cout<<"EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE"<<endl;
                 if(reg_src1_pres==reg_dest_prev){
                 if(reg_prev_type!=13 && reg_prev_type!=14 && reg_prev_type!=15){
                    x1=3;
@@ -616,7 +582,6 @@ int simulator::is_there_datahazard(int n){
                  x1=0;
             }
             else{
-                cout<<"iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii"<<endl;
             if(reg_src2_pres == reg_dest_prev || reg_src1_pres == reg_dest_prev){
               if(reg_prev_type!=13 && reg_prev_type!=14 && reg_prev_type!=15){  
             x1=3;
@@ -657,22 +622,13 @@ int simulator::is_there_datahazard(int n){
         else{
          if(reg_src2_pres == reg_dest_prev || reg_src1_pres == reg_dest_prev){
              if(reg_prev_type!=13 && reg_prev_type!=14 && reg_prev_type!=15){ 
-            cout<<"hhhhhhhhhhhhhhh3333333333"<<endl;
             
             x1=3;
              }
              else x1=0;
         }
         else if(reg_src2_pres == reg_dest_prev_prev || reg_src1_pres == reg_dest_prev_prev){
-            /* if(reg_prev_prev_type!=13 && reg_prev_prev_type!=14 && reg_prev_prev_type!=15){ 
-            cout<<"hhhhhhhhhhh333333333222222222"<<endl;
-           
-           x1=2;
-             }
-             else x1=0;*/
-            cout<<"YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY"<<endl;
             if(reg_prev_prev_type!=13 && reg_prev_prev_type!=14 && reg_prev_prev_type!=15){
-            cout<<"hhhhhhhhhhh333333333222222222"<<endl;
               if(reg_src2_pres==reg_dest_prev_prev){
                   if(reg_src2_pres==reg_src1_prev || reg_src2_pres==reg_src2_prev){
                       x1=0;
@@ -695,7 +651,6 @@ int simulator::is_there_datahazard(int n){
         }
         else if(reg_src2_pres == reg_dest_prev_prev_prev || reg_src1_pres == reg_dest_prev_prev_prev){
              if(reg_prev_prev_prev_type!=13 && reg_prev_prev_prev_type!=14 && reg_prev_prev_prev_type!=15){
-            cout<<"hhhhhhhhhhh333333333222222222"<<endl;
                 if(reg_src2_pres==reg_dest_prev_prev_prev){
                   if(reg_src2_pres==reg_src1_prev || reg_src2_pres==reg_src2_prev || reg_src2_pres==reg_src2_prev_prev || reg_src2_pres == reg_src1_prev_prev){
                       x1=0;
@@ -712,13 +667,10 @@ int simulator::is_there_datahazard(int n){
                       x1=1;
                   }
               }
-
-         //  x1=1;
              }
              else x1=0;
         }
         else{
-             cout<<"hhhhhhhhhhhhhhh3333333333"<<endl;
            x1=0;
         }
         }
@@ -727,20 +679,14 @@ int simulator::is_there_datahazard(int n){
       return x1;
     }
     else{            ////////////////////////////////forwarding
-        cout<<"qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq"<<endl;
         int x2=-2;
     if(n==1){
-        cout<<"HHHHHHHHHHHHHHHHHHHHHH111111111111111111"<<endl;
         x2=0;
     } 
     else if(n==2){
-         cout<<"HHHHHHHHHHHHHHHHHHHHHH22222222222222222"<<endl;
         int reg_src1_pres = each_instruction_info[each_instruction_info.size()-1].r2;
-        cout<<"present"<<reg_src1_pres<<endl;
         int reg_src2_pres = each_instruction_info[each_instruction_info.size()-1].r3;
-        cout<<"present"<<reg_src2_pres<<endl;
         int reg_dest_prev = each_instruction_info[each_instruction_info.size()-2].r1;
-        cout<<"present"<<reg_dest_prev<<endl;
         int reg_pres_type = each_instruction_info[each_instruction_info.size()-1].typeo;
         int reg_prev_type = each_instruction_info[each_instruction_info.size()-2].typeo;
         if(reg_pres_type==13 || reg_pres_type==14){
@@ -775,13 +721,13 @@ int simulator::is_there_datahazard(int n){
     }
     else{
         int reg_src1_pres = each_instruction_info[each_instruction_info.size()-1].r2;
-        cout<<"present"<<reg_src1_pres<<endl;
+        //cout<<"present"<<reg_src1_pres<<endl;
         int reg_src2_pres = each_instruction_info[each_instruction_info.size()-1].r3;
-        cout<<"present"<<reg_src2_pres<<endl;
+        //cout<<"present"<<reg_src2_pres<<endl;
         int reg_dest_prev = each_instruction_info[each_instruction_info.size()-2].r1;
-        cout<<"present"<<reg_dest_prev<<endl;
+        //cout<<"present"<<reg_dest_prev<<endl;
         int reg_dest_prev_prev = each_instruction_info[each_instruction_info.size()-3].r1;
-        cout<<"present"<<reg_dest_prev_prev<<endl;
+        //cout<<"present"<<reg_dest_prev_prev<<endl;
         int reg_pres_type = each_instruction_info[each_instruction_info.size()-1].typeo;
         int reg_prev_type = each_instruction_info[each_instruction_info.size()-2].typeo;
         if(reg_pres_type==15){
@@ -812,7 +758,7 @@ int simulator::is_there_datahazard(int n){
            }
         }
         else if(reg_src2_pres == reg_dest_prev_prev || reg_src1_pres == reg_dest_prev_prev){
-            cout<<"hhhhhhhhhhh333333333222222222"<<endl;
+           // cout<<"hhhhhhhhhhh333333333222222222"<<endl;
             
             x2=0;
           
@@ -831,7 +777,7 @@ void simulator::RemoveSpaces(string &str)
     //return str; 
 }
 
-simulator::simulator(ifstream& file,int need,Cache level1,Cache level2,int b1,int b2){
+simulator::simulator(ifstream& file,int need,Cache level1,Cache level2,int b1,int b2,int lca1,int lca2,int mma){  // start of program
    
     number_of_instructions=0;
     pc=0;
@@ -839,6 +785,11 @@ simulator::simulator(ifstream& file,int need,Cache level1,Cache level2,int b1,in
     sim_level2 = level2;
     block_size1 = b1;
     block_size2 = b2;
+    level1_cache_latency = lca1;
+    level2_cache_latency = lca2;
+    main_mem_latency = mma;
+    number_of_labels_found=0;
+    number_of_instructions_executed=0;
     if(need==1){
     data_forwarding_enabled=true;
     }
@@ -846,7 +797,7 @@ simulator::simulator(ifstream& file,int need,Cache level1,Cache level2,int b1,in
     data_forwarding_enabled=false;
     }
     total_stalls=0;
-    file.open("pipe.s");
+    file.open("cachefor.s"); // opening the file
     if(!file.is_open()){
         cout<<"unable to open file";
     }
@@ -857,7 +808,7 @@ simulator::simulator(ifstream& file,int need,Cache level1,Cache level2,int b1,in
             string line;
             getline(file,line);
         cout<<line<<endl;
-        program.push_back(line);
+        program.push_back(line); // keeping all the instructions in vector
         }
     }
    
@@ -866,45 +817,40 @@ simulator::simulator(ifstream& file,int need,Cache level1,Cache level2,int b1,in
 
 string simulator::instruction_fetch(int n){
     string s = program[n];
-    cout<<"ififififififififififififififififififi"<<endl;
-    RemoveSpaces(s);
-    pc=pc+1;
-    cout<<s<<"JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ"<<endl;
+   // cout<<"ififififififififififififififififififi"<<endl;
+    RemoveSpaces(s); //removing spaces
+    pc=pc+1; // incrementing pc
+   // cout<<s<<"JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ"<<endl;
     return s;
 }
 
 int * simulator::instruction_drf(string s){
-    //RemoveSpaces(s);
-    cout<<s<<"[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["<<endl;
-   // present_instruction=s;
     registers_of_each_instruction r;  ////////////////
     int count=0;
     int size_of_operation;
-    string s1=program[pc-1];/////////////////////////
-    cout<<s1<<"jjjjjjjjjjjjjjjjjjjjjjjjj"<<endl;
-    for(int i=0;i<4;i++){
+    string s1=program[pc-1];/////
+    for(int i=0;i<4;i++){ //as it have max4 to get size of operation
         if(s1[i]==' '|| s1[i]=='\t')
 		{
 			break;
 		}
         count++;
     }
-    string operation =s1.substr(0,count);
-    cout<<operation<<"lllllllllllllllllllllllllllllll"<<endl;
+    string operation =s1.substr(0,count); // to get the operation
     string registers_in_instruction;
     if(count<s.size()-1)
-        registers_in_instruction=s.substr(count+1);
+        registers_in_instruction=s.substr(count+1); // registers
     RemoveSpaces(registers_in_instruction);  
-    cout<<registers_in_instruction<<"\\\\\\\\\\\\\\\\\\\\\\"<<endl;  
+    //cout<<registers_in_instruction<<"\\\\\\\\\\\\\\\\\\\\\\"<<endl;  
     int position_in_array=-1;
-    for(int i=0;i<17;i++){
+    for(int i=0;i<17;i++){ // checking with the position
         if(operation==operations_allowed[i]){
             position_in_array=i;
             break;
         }
     }
     
-    if(position_in_array==-1){
+    if(position_in_array==-1){  // it is an invalid operation
         cout<<"invalid-operation";
         registers_in_present_instruction[4]={-2};
         r.r1=-2;
@@ -916,7 +862,7 @@ int * simulator::instruction_drf(string s){
 
     else if(position_in_array<7){
         registers_in_present_instruction[4]={-1};
-        valid_register(registers_in_instruction,6); //*********
+        valid_register(registers_in_instruction,6); // validating 
         registers_in_present_instruction[3]=position_in_array;
         r.r1=registers_in_present_instruction[0];
         r.r2=registers_in_present_instruction[1];
@@ -926,7 +872,6 @@ int * simulator::instruction_drf(string s){
        
     }
     else if(position_in_array<11){
-        cout<<"eeeeeeeeeeeeeeeeeeeeellllllllllsssssssssssssssss>>endl;";
         registers_in_present_instruction[4]={0};
         valid_register(registers_in_instruction,10);
         registers_in_present_instruction[3]=position_in_array;
@@ -949,6 +894,7 @@ int * simulator::instruction_drf(string s){
        
     }
     else if(position_in_array<15){
+       
         registers_in_present_instruction[4]={0};
         valid_register(registers_in_instruction,14);
         registers_in_present_instruction[3]=position_in_array;
@@ -960,6 +906,9 @@ int * simulator::instruction_drf(string s){
       
     }
     else if(position_in_array==15){
+        // cout<<"11111111111111111111113333333333333333333333333111111111111111111111111111144444444444444444444444"<<endl;
+        cout<<registers_in_instruction<<endl;
+       // cout<<"11111111111111111111113333333333333333333333333111111111111111111111111111144444444444444444444444"<<endl;
         registers_in_present_instruction[4]={0};
         valid_register(registers_in_instruction,15);
         registers_in_present_instruction[3]=position_in_array;
@@ -985,10 +934,10 @@ int * simulator::instruction_drf(string s){
 }
 
 string to_bit_string(int x){  // to get the bits in form of string
-    return bitset<13>(x).to_string();
+    return bitset<13>(x).to_string(); // as we have 4kb we used 13
 }
 
-void fun(int *a,int l,int k,vector<int>&b){
+void fun(int *a,int l,int k,vector<int>&b){ // function to get the required data from main memory to keep in cache
     int f = l%k;
     for(int j=0;j<=l%k;j++){
         b.push_back(a[l-f]);
@@ -999,102 +948,54 @@ void fun(int *a,int l,int k,vector<int>&b){
         b.push_back(a[l+k1]);
         k1++;
     }
-    cout<<"-----------------"<<endl;
-    for(int i=0;i<b.size();i++){
+   // cout<<"-----------------"<<endl;
+   /* for(int i=0;i<b.size();i++){
         cout<<b[i]<<endl;
-    }
-}
-void change_memory(Cache c,int a1,int a2,int k,int l,int *a){
-    cout<<"xxxxxxxxxxxxxxxxxxxxxxxxxx"<<endl;
-   /* int f = l%block_size1;
-    cout<<f<<endl;
-    for(int j=0;j<=l%block_size1;j++){
-      //  b.push_back(a[l-f]);
-      cout<<"yyyyyyyyyyyyyyyyyyyyyyyyyyy"<<endl;
-      a[l-f]=c.sets_level[x1].blocks_level[x4].data[j];
-        f--;
-    }
-    int k1=1;
-    for(int j=l%block_size1+1;j<=(block_size1-1);j++){
-        cout<<"zzzzzzzzzzzzzzzzzzzzzz"<<endl;
-        //b.push_back(a[l+k1]);
-        a[l+k1]=c.sets_level[x1].blocks_level[x4].data[j];
-        k1++;
     }*/
-    cout<<l<<endl;
-    cout<<k<<endl;
-    cout<<a1<<endl;
-    cout<<a2<<endl;
+}
+void change_memory(Cache c,int a1,int a2,int k,int l,int *a){ // to change the main memory data values
     for(int i=0;i<k;i++){
-        cout<<"xxxxxxxxxxx"<<endl;
+     //  cout<<"xxxxxxxxxxx"<<endl;
         cout<<c.sets_level[a1].blocks_level[a2].data[i]<<endl;
         a[l+i]=c.sets_level[a1].blocks_level[a2].data[i];
     }
 } 
-string bin(long n)
-  {
-    long i;
-    string s;
-    s=s+"0";
-    //cout << "0";
-    for (i = 1 << 30; i > 0; i = i / 2)
-    {
-      if((n & i) != 0)
-      {
-        //cout << "1";
-        s=s+"1";
-      }
-      else
-      {
-        //cout << "0";
-        s=s+"0";
-      }
-    }
-    return s;
-  }
-int simulator::instruction_memory(int m,int n){
+
+int simulator::instruction_memory(int m,int n){ // memory function
+   // cout<<"wwwwwwwwwwwwwwwwwwhhhhhhhhhhhhhhhhhhhhhaaaaaaaaaaaaaaaaaaaattttttttttttttttt"<<endl;
     int re = -1;
     if(n>=0 && n<=10){
        // return m;
        re = m;
     }
-    else if(n==11){
+    else if(n==11){ // lw type instruction
         cout<<"----------------------------------------------------------------------------------"<<endl;
         cout<<"lw "<<endl;
         cout<<"--------------------------------------------------------------------"<<endl;
-
-        cout<<"mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"<<endl;
-        cout<<m<<endl;
-        cout<<n<<endl;
-        cout<<"????????????????????????????????????????????????????????????????????????????????????????????????????"<<endl;
+        lwsw_ins++;
         string address = to_bit_string(m); // converting the address to a bit string format
-       // Cache l1;
-        //l1.access(l1,address);
         int found_in_level2 = INT_MAX;
-        cout<<"start checking"<<endl;
+      //  cout<<"start checking"<<endl;
         int found_in_level1 = sim_level1.access_level(sim_level1,address);  // to check whether we have that address in level1 cache
-        cout<<"ccccccccccccccccccccccccccccccccccccccccccccccccccccccc"<<endl;
+       // cout<<"ccccccccccccccccccccccccccccccccccccccccccccccccccccccc"<<endl;
         cout<<found_in_level1<<endl;
-        cout<<"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"<<endl;
-       // if(found_in_level1==INT_MAX){
+       // cout<<"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"<<endl;
+        if(found_in_level1==INT_MAX){
             found_in_level2 = sim_level2.access_level(sim_level2,address); // checking whether we have that address in level2 cache
-      //  }
-        cout<<"ccccccccccccccccccccccccccccccccccccccccccccccccccccccc"<<endl;
-        cout<<found_in_level2<<endl;
-        cout<<"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"<<endl;
+        }
         int x1 = sim_level1.req_set_index_level(sim_level1,address); // to get req set index if foud in level1
-        cout<<x1<<endl;
+       // cout<<x1<<endl;
         int x2 = sim_level1.getnum_of_sets_in_cache_level();  // total no of sets in level1
-        cout<<x2<<endl;
+       // cout<<x2<<endl;
         int x3 = sim_level1.sets_level[x1].getnum_of_blocks_in_set_level(); // no of blocks in set in level1
-        cout<<x3<<endl;
+       // cout<<x3<<endl;
         int x4=-1;
         int y1 = sim_level2.req_set_index_level(sim_level2,address);  // to get req set index if found in level2
-        cout<<y1<<endl;
+       // cout<<y1<<endl;
         int y2 = sim_level2.getnum_of_sets_in_cache_level();  // total no of sets in level2
-        cout<<y2<<endl;
+      //  cout<<y2<<endl;
         int y3 = sim_level2.sets_level[y1].getnum_of_blocks_in_set_level();  // to get no of blocks in set in level2
-        cout<<y3<<endl;
+       // cout<<y3<<endl;
         int y4=-1;
         for(int j=0;j<x3;j++){  // checking whether there is empty block satisfying our needs in level1
         if(sim_level1.sets_level[x1].blocks_level[j].tag == "NULL"){
@@ -1114,20 +1015,15 @@ int simulator::instruction_memory(int m,int n){
         cout<<"found in level 2 cache "<<endl;
         cout<<"--------------------------------------------------------------------"<<endl;
             lru2++;
+            hit++;
           //  sim_level2.sets_level[y1].blocks_level[]
             int y5 = sim_level2.sets_level[y1].req_block_no_in_set_in_level; // as it is hit in level2 increase its lru
-            cout<<y5<<"nnnnnnnnnnnneeeeeeeeeeeeeeeddddddddddddddddddddddddddddddddddd"<<endl;
+          //  cout<<y5<<"nnnnnnnnnnnneeeeeeeeeeeeeeeddddddddddddddddddddddddddddddddddd"<<endl;
             int y6 = sim_level2.req_data_position_in_block(sim_level2,address);
-            cout<<y6<<"innnnnnnndddddeeeeeexxxxxxxx"<<endl;
+           // cout<<y6<<"innnnnnnndddddeeeeeexxxxxxxx"<<endl;
             re = sim_level2.sets_level[y1].blocks_level[y5].data[y6];  // getting the required data from level 2 cache
-            cout<<re<<"           "<<"***************"<<endl;
+           // cout<<re<<"           "<<"***************"<<endl;
             sim_level2.sets_level[y1].blocks_level[y5].lru = lru2;
-           // string ss1 = sim_level2.sets_level[y1].blocks_level[y5].tag;
-           // string ss2 = bitset<13>(x).to_string();
-           // string ss2 = sim_level2.level_index_str;
-           // string ss3 = sim_level2.level_offset_str;
-           // string ss = ss1+ss2+ss3;
-           // int pos_in_memory = (stoi(address,nullptr,2))/4;
         if(x4 != -1){  // if there is empty block we can place the block there
         /////////////////////////// add the block into the null place
          cout<<"----------------------------------------------------------------------------------"<<endl;
@@ -1135,11 +1031,11 @@ int simulator::instruction_memory(int m,int n){
         cout<<"--------------------------------------------------------------------"<<endl;
         vector<int> data_values_in_block;
         fun(memory_element_values,m,block_size1,data_values_in_block);
+        // here we keep the values we get from the main memory into cache
         for(int j=0;j<block_size1;j++){
             sim_level1.sets_level[x1].blocks_level[x4].data[j] = data_values_in_block[j];
-            cout<<"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ11111111111"<<endl;
+          //  cout<<"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ11111111111"<<endl;
             cout<<data_values_in_block[j]<<endl;
-            cout<<"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ11111111111"<<endl;
         }
         lru1++;
         sim_level1.sets_level[x1].blocks_level[x4].tag = address.substr(0,13-(int)log2(block_size1)-(int)log2(x2));
@@ -1157,24 +1053,12 @@ int simulator::instruction_memory(int m,int n){
                 b1=k;
                 }
             }
-         /*   if(sim_level1.sets_level[x1].blocks_level[b1].dirty==1){ // if the block to be replaced in level1 have dirty bit 1
-                // write back to memory
-                int yo = m-(m%block_size1);
-                change_memory(sim_level1,x1,b1,block_size1,yo,memory_element_values);  // write it back to the main memory
-             }*/
-             /////////////////////////////////////////////////////////////////////
-             /////////////////////////////////////////////////////////////////////
-             //pk
-             //sim_level2.sets_level[y1].blocks_level[y5].
-             // constraint block size should be equal for the caches
              int yy = (int)log2(block_size1);
-             //string ss1 = bitset<yy>(block_size1).to_string();
              string ss1 = bin(block_size1).substr(32-(yy+1),yy+1);
              int xx = 13-((int)log2(block_size1))-(sim_level1.sets_level[x1].blocks_level[b1].tag.length());
-             //string ss2 = bitset<((int)log2(xx))>(x1);
              string ss2 = bin(x1).substr(32-(xx+1),xx+1);
-             string to_be_replaced_address = sim_level1.sets_level[x1].blocks_level[b1].tag+ss2+ss1;
-
+             string to_be_replaced_address = sim_level1.sets_level[x1].blocks_level[b1].tag+ss2+ss1;  // this is the address of the block that is to be replaced according to lru policy
+            // we search this address in cache level2 and update the value
              int set_index_to_search = sim_level2.req_set_index_level(sim_level2,to_be_replaced_address);
              int xx2 = (int)log2(block_size2);
              int xx3 = (int)log2(sim_level2.getnum_of_sets_in_cache_level());
@@ -1186,25 +1070,24 @@ int simulator::instruction_memory(int m,int n){
                          
                      }
                      sim_level2.sets_level[set_index_to_search].blocks_level[f].lru = sim_level1.sets_level[x1].blocks_level[b1].lru;
+                     sim_level2.sets_level[set_index_to_search].blocks_level[f].dirty = sim_level1.sets_level[x1].blocks_level[b1].dirty;
                  }
              }
              /////////////////////////////////////////////////////////////////////
              /////////////////////////////////////////////////////////////////////
 
-             // keeping the block in that place
+             // keeping the block in the place 
             vector<int> data_values_in_block;
             fun(memory_element_values,m,block_size1,data_values_in_block);
             for(int j=0;j<block_size1;j++){
             sim_level1.sets_level[x1].blocks_level[b1].data[j] = data_values_in_block[j];
-            cout<<"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ11111111111"<<endl;
-            cout<<data_values_in_block[j]<<endl;
-            cout<<"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ11111111111"<<endl;
             }
             lru1++;
             sim_level1.sets_level[x1].blocks_level[b1].tag = address.substr(0,13-(int)log2(block_size1)-(int)log2(x2));
             sim_level1.sets_level[x1].blocks_level[b1].lru = lru1; 
             sim_level1.sets_level[x1].blocks_level[b1].dirty=0;
         }
+        clockcycle = clockcycle+(level1_cache_latency+level2_cache_latency)-1;
         }
 
        else if(found_in_level2==INT_MAX && found_in_level1==INT_MAX){   //miss in both level1 and level2
@@ -1217,40 +1100,29 @@ int simulator::instruction_memory(int m,int n){
          cout<<"----------------------------------------------------------------------------------"<<endl;
         cout<<"ther is place in level1"<<endl;
         cout<<"--------------------------------------------------------------------"<<endl;
-        cout<<"88888888888888888888888888888888888888888888888"<<endl;
         vector<int> data_values_in_block;
         fun(memory_element_values,m,block_size1,data_values_in_block);
-        for(int j=0;j<block_size1;j++){
+        for(int j=0;j<block_size1;j++){ // keeping data values
             sim_level1.sets_level[x1].blocks_level[x4].data[j] = data_values_in_block[j];
-            cout<<"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ11111111111"<<endl;
-            cout<<data_values_in_block[j]<<endl;
-            cout<<"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ11111111111"<<endl;
         }
-        lru1++;
-        sim_level1.sets_level[x1].blocks_level[x4].tag = address.substr(0,13-(int)log2(block_size1)-(int)log2(x2));
-        sim_level1.sets_level[x1].blocks_level[x4].lru = lru1;
+        lru1++; 
+        sim_level1.sets_level[x1].blocks_level[x4].tag = address.substr(0,13-(int)log2(block_size1)-(int)log2(x2)); // updating tag
+        sim_level1.sets_level[x1].blocks_level[x4].lru = lru1; // updating the lru
         /////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        if(y4!=-1){
+        if(y4!=-1){ // there is empty place in level2 cache
         cout<<"----------------------------------------------------------------------------------"<<endl;
         cout<<"ther is an empty place to keep in level2 "<<endl;
         cout<<"--------------------------------------------------------------------"<<endl;
         vector<int> data_values_in_block2;
         fun(memory_element_values,m,block_size2,data_values_in_block2);
-        cout<<"hhhhhhhhhhhhhhhhhhhhhhhiiiiiiiiiiiiiiiiiiiiiiiii"<<endl;
-        cout<<block_size2<<endl;
         for(int j=0;j<block_size2;j++){
-            cout<<"sssssssssssssssssssssssssssss"<<endl;
-            cout<<sim_level2.sets_level[y1].blocks_level[y4].data[j]<<endl;
             sim_level2.sets_level[y1].blocks_level[y4].data[j] = data_values_in_block2[j];
-            cout<<"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ"<<endl;
-            cout<<data_values_in_block2[j]<<endl;
-            cout<<"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ"<<endl;
         }
         lru2++;
         sim_level2.sets_level[y1].blocks_level[y4].tag = address.substr(0,13-(int)log2(block_size2)-(int)log2(y2));
         sim_level2.sets_level[y1].blocks_level[y4].lru = lru2;
         }
-        else{
+        else{  // there is no empty place in level2 
         cout<<"----------------------------------------------------------------------------------"<<endl;
         cout<<"no empty place in level2 we have to replace "<<endl;
         cout<<"--------------------------------------------------------------------"<<endl;
@@ -1270,23 +1142,14 @@ int simulator::instruction_memory(int m,int n){
          }
 
          /////////////////////////////////////////////////////////////////////
-             /////////////////////////////////////////////////////////////////////
-             //pk
-             //sim_level2.sets_level[y1].blocks_level[y5].
-             // constraint block size should be equal for the caches
-             /*string ss1 = bitset<(int)log2(block_size2)>(block_size2).to_string();
-             int xx = 12-((int)log2(block_size2))-(sim_level2.sets_level[y1].blocks_level[b2].tag.length());
-             string ss2 = bitset<(int)log2(xx)>(y1);*/
 
              int yy = (int)log2(block_size2);
-             //string ss1 = bitset<yy>(block_size1).to_string();
              string ss1 = bin(block_size2).substr(32-(yy+1),yy+1);
              int xx = 13-((int)log2(block_size2))-(sim_level2.sets_level[y1].blocks_level[b2].tag.length());
-             //string ss2 = bitset<((int)log2(xx))>(x1);
              string ss2 = bin(y1).substr(32-(xx+1),xx+1);
 
              string to_be_replaced_address = sim_level2.sets_level[y1].blocks_level[b2].tag+ss2+ss1;
-
+             // here we check the above address in level1 also and free it
              int set_index_to_search = sim_level1.req_set_index_level(sim_level1,to_be_replaced_address);
              int xx2 = (int)log2(block_size1);
              int xx3 = (int)log2(sim_level1.getnum_of_sets_in_cache_level());
@@ -1299,6 +1162,7 @@ int simulator::instruction_memory(int m,int n){
                      }
                      sim_level1.sets_level[set_index_to_search].blocks_level[f].lru = 0;
                      sim_level1.sets_level[set_index_to_search].blocks_level[f].tag="NULL";
+                     sim_level1.sets_level[set_index_to_search].blocks_level[f].dirty=0;
                      break;
                  }
              }
@@ -1308,18 +1172,17 @@ int simulator::instruction_memory(int m,int n){
              //////////////////////////////////////////////////////////////////////////////////////////////////
              ////////////////////////////////////////////////////////////////////////////////////////
         vector<int> data_values_in_block2;
-        fun(memory_element_values,m,block_size1,data_values_in_block2);
+        fun(memory_element_values,m,block_size1,data_values_in_block2); // we replace the block
         for(int j=0;j<block_size2;j++){
             sim_level2.sets_level[y1].blocks_level[b2].data[j] = data_values_in_block2[j];
-            cout<<"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ"<<endl;
-            cout<<data_values_in_block2[j]<<endl;
         }
         lru2++;
         sim_level2.sets_level[y1].blocks_level[b2].tag = address.substr(0,13-(int)log2(block_size2)-(int)log2(y2));
         sim_level2.sets_level[y1].blocks_level[b2].lru = lru2;
+        sim_level2.sets_level[y1].blocks_level[b2].dirty=0;
         }
     }
-    else{
+    else{ // there is no enough place in level1
         cout<<"----------------------------------------------------------------------------------"<<endl;
         cout<<"there is no enough place in level1 we have to replace"<<endl;
         cout<<"--------------------------------------------------------------------"<<endl;
@@ -1332,22 +1195,6 @@ int simulator::instruction_memory(int m,int n){
                 b1=k;
             }
         }
-      /*  if(sim_level1.sets_level[x1].blocks_level[b1].dirty==1){ // if the block to be replaced in level1 have dirty bit 1
-                // write back to memory
-                cout<<"bbbbbbbbbboooooooooooooooommmmmmmmmmmmm11111111111111111111111"<<endl;
-                int yo = m-(m%block_size1);
-                change_memory(sim_level1,x1,b1,block_size1,yo,memory_element_values);  // write it back to the main memory
-        }*/
-
-         /////////////////////////////////////////////////////////////////////
-             /////////////////////////////////////////////////////////////////////
-             //pk
-             //sim_level2.sets_level[y1].blocks_level[y5].
-             // constraint block size should be equal for the caches
-            /* string ss1 = bitset<(int)log2(block_size1)>(block_size1).to_string();
-             int xx = 12-((int)log2(block_size1))-(sim_level1.sets_level[x1].blocks_level[b1].tag.length());
-             string ss2 = bitset<(int)log2(xx)>(x1);*/
-
              int yy = (int)log2(block_size1);
              //string ss1 = bitset<yy>(block_size1).to_string();
              string ss1 = bin(block_size1).substr(32-(yy+1),yy+1);
@@ -1375,8 +1222,8 @@ int simulator::instruction_memory(int m,int n){
         fun(memory_element_values,m,block_size1,data_values_in_block);
         for(int j=0;j<block_size1;j++){
             sim_level1.sets_level[x1].blocks_level[b1].data[j] = data_values_in_block[j];
-            cout<<"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ"<<endl;
-            cout<<data_values_in_block[j]<<endl;
+           // cout<<"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ"<<endl;
+            //cout<<data_values_in_block[j]<<endl;
         }
         lru1++;
         sim_level1.sets_level[x1].blocks_level[b1].tag = address.substr(0,13-(int)log2(block_size1)-(int)log2(x2));
@@ -1391,8 +1238,8 @@ int simulator::instruction_memory(int m,int n){
         fun(memory_element_values,m,block_size2,data_values_in_block1);
         for(int j=0;j<block_size2;j++){
             sim_level2.sets_level[y1].blocks_level[y4].data[j] = data_values_in_block1[j];
-            cout<<"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ"<<endl;
-            cout<<data_values_in_block1[j]<<endl;
+            //cout<<"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ"<<endl;
+           // cout<<data_values_in_block1[j]<<endl;
         }
         lru2++;
         sim_level2.sets_level[y1].blocks_level[y4].tag = address.substr(0,13-(int)log2(block_size2)-(int)log2(y2));
@@ -1412,18 +1259,10 @@ int simulator::instruction_memory(int m,int n){
         }
         if(sim_level2.sets_level[y1].blocks_level[b2].dirty==1){ // if the block to be replaced in level1 have dirty bit 1
                 // write back to memory
-                 cout<<"bbbbbbbbbboooooooooooooooommmmmmmmmmmmm2222222222222222222222"<<endl;
+                 //cout<<"bbbbbbbbbboooooooooooooooommmmmmmmmmmmm2222222222222222222222"<<endl;
                 int yo = m-(m%block_size2);
                 change_memory(sim_level2,y1,b2,block_size2,yo,memory_element_values);  // write it back to the main memory
         }
-        /////////////////////////////////////////////////////////////////////
-             /////////////////////////////////////////////////////////////////////
-             //pk
-             //sim_level2.sets_level[y1].blocks_level[y5].
-             // constraint block size should be equal for the caches
-             /*string ss1 = bitset<(int)log2(block_size2)>(block_size2).to_string();
-             int xx = 12-((int)log2(block_size2))-(sim_level2.sets_level[y1].blocks_level[b2].tag.length());
-             string ss2 = bitset<(int)log2(xx)>(y1);*/
              int yy = (int)log2(block_size2);
              //string ss1 = bitset<yy>(block_size1).to_string();
              string ss1 = bin(block_size2).substr(32-(yy+1),yy+1);
@@ -1447,17 +1286,14 @@ int simulator::instruction_memory(int m,int n){
                      break;
                  }
              }
-             ////////////////////////////////////////////////////////////////////////////////////////////
-             ///////////////////////////////////////////////////////////////////////////////////////////////
-             ////////////////////////////////////////////////////////////////////////////////////////////////
              //////////////////////////////////////////////////////////////////////////////////////////////////
              ////////////////////////////////////////////////////////////////////////////////////////
         vector<int> data_values_in_block2;
         fun(memory_element_values,m,block_size1,data_values_in_block2);
         for(int j=0;j<block_size2;j++){
             sim_level2.sets_level[y1].blocks_level[b2].data[j] = data_values_in_block2[j];
-            cout<<"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ"<<endl;
-            cout<<data_values_in_block2[j]<<endl;
+            //cout<<"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ"<<endl;
+           // cout<<data_values_in_block2[j]<<endl;
         }
         lru2++;
         sim_level2.sets_level[y1].blocks_level[b2].tag = address.substr(0,13-(int)log2(block_size2)-(int)log2(y2));
@@ -1465,20 +1301,23 @@ int simulator::instruction_memory(int m,int n){
         }
 
       }
+      clockcycle = clockcycle+(level1_cache_latency+level2_cache_latency+main_mem_latency)-1;
       re = memory_element_values[m];
     }
         else{
          cout<<"----------------------------------------------------------------------------------"<<endl;
         cout<<"found in level1 cache itself"<<endl;
         cout<<"--------------------------------------------------------------------"<<endl;
-            cout<<"===================================================================="<<endl;
+        hit++;
+            //cout<<"===================================================================="<<endl;
              int x5 = sim_level1.sets_level[x1].req_block_no_in_set_in_level; // as it is hit in level2 increase its lru
-            cout<<x5<<"nnnnnnnnnnnneeeeeeeeeeeeeeeddddddddddddddddddddddddddddddddddd"<<endl;
+            //cout<<x5<<"nnnnnnnnnnnneeeeeeeeeeeeeeeddddddddddddddddddddddddddddddddddd"<<endl;
            int x6 = sim_level1.req_data_position_in_block(sim_level1,address);
-            cout<<x6<<"innnnnnnndddddeeeeeexxxxxxxx"<<endl;
+          // cout<<x6<<"innnnnnnndddddeeeeeexxxxxxxx"<<endl;
             lru1++;
             sim_level1.sets_level[x1].blocks_level[x5].lru = lru1;
             re = sim_level1.sets_level[x1].blocks_level[x5].data[x6];
+            clockcycle = clockcycle+level1_cache_latency-1;
         }
       // re = memory_element_values[m];
       cout<<"rrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrrr"<<endl;
@@ -1486,62 +1325,27 @@ int simulator::instruction_memory(int m,int n){
       cout<<"eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee"<<endl;
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    else if(n==12){
+    else if(n==12){ // instruction of type sw
         cout<<"----------------------------------------------------------------------------------"<<endl;
         cout<<"sw case"<<endl;
         cout<<"--------------------------------------------------------------------"<<endl;
-        cout<<"ssssssssssssssssssssssssssssssssssssssssssssssssssswwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww"<<endl;
+        lwsw_ins++;
+        // this case is also similar to lw but we aslso change the data we keep in cache 
+       // cout<<"ssssssssssssssssssssssssssssssssssssssssssssssssssswwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww"<<endl;
          string address = to_bit_string(m); // converting the address to a bit string format
         int found_in_level2 = INT_MAX;
         int found_in_level1 = sim_level1.access_level(sim_level1,address);  // to check whether we have that address in level1 cache
-        cout<<"ccccccccccccccccccccccccccccccccccccccccccccccccccccccc"<<endl;
-        cout<<found_in_level1<<endl;
-        cout<<"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"<<endl;
-       // if(found_in_level1==INT_MAX){
             found_in_level2 = sim_level2.access_level(sim_level2,address); // checking whether we have that address in level2 cache
-      //  }
-        cout<<"ccccccccccccccccccccccccccccccccccccccccccccccccccccccc"<<endl;
-        cout<<found_in_level2<<endl;
-        cout<<"cccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"<<endl;
         int x1 = sim_level1.req_set_index_level(sim_level1,address); // to get req set index if foud in level1
-        cout<<x1<<endl;
         int x2 = sim_level1.getnum_of_sets_in_cache_level();  // total no of sets in level1
-        cout<<x2<<endl;
         int x3 = sim_level1.sets_level[x1].getnum_of_blocks_in_set_level(); // no of blocks in set in level1
-        cout<<x3<<endl;
         int x4=-1;
-       // int x5 = sim_level1.sets_level[x1].req_block_no_in_set_in_level;
-       // cout<<x5<<endl;
         int x6 = sim_level1.req_data_position_in_block(sim_level1,address);
-        cout<<x6<<endl;
         int y1 = sim_level2.req_set_index_level(sim_level2,address);  // to get req set index if found in level2
-        cout<<y1<<endl;
         int y2 = sim_level2.getnum_of_sets_in_cache_level();  // total no of sets in level2
-        cout<<y2<<endl;
         int y3 = sim_level2.sets_level[y1].getnum_of_blocks_in_set_level();  // to get no of blocks in set in level2
-        cout<<y3<<endl;
         int y4=-1;
-       // int y5 = sim_level2.sets_level[y1].req_block_no_in_set_in_level;
-       // cout<<y5<<endl;
         int y6 = sim_level2.req_data_position_in_block(sim_level2,address);
-        cout<<x6<<endl;
-       // int y6 = stoi()
         for(int j=0;j<x3;j++){  // checking whether there is empty block satisfying our needs in level1
             if(sim_level1.sets_level[x1].blocks_level[j].tag == "NULL"){
                 x4 = j;
@@ -1554,18 +1358,6 @@ int simulator::instruction_memory(int m,int n){
                 break;
             }
         }
-
-
-
-
-
-
-
-
-
-
-
-
         if(found_in_level2==INT_MAX && found_in_level1==INT_MAX){   //miss in both level1 and level2
         cout<<"----------------------------------------------------------------------------------"<<endl;
         cout<<"didnt found in lvel1 and level2"<<endl;
@@ -1581,9 +1373,6 @@ int simulator::instruction_memory(int m,int n){
         fun(memory_element_values,m,block_size1,data_values_in_block);
         for(int j=0;j<block_size1;j++){
             sim_level1.sets_level[x1].blocks_level[x4].data[j] = data_values_in_block[j];
-            cout<<"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ11111111111"<<endl;
-            cout<<data_values_in_block[j]<<endl;
-            cout<<"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ11111111111"<<endl;
         }
         sim_level1.sets_level[x1].blocks_level[x4].data[x6]=value_of_registers[registers_in_present_instruction[0]];
         sim_level1.sets_level[x1].blocks_level[x4].dirty=1;
@@ -1597,17 +1386,10 @@ int simulator::instruction_memory(int m,int n){
         cout<<"--------------------------------------------------------------------"<<endl;
         vector<int> data_values_in_block2;
         fun(memory_element_values,m,block_size2,data_values_in_block2);
-        cout<<"hhhhhhhhhhhhhhhhhhhhhhhiiiiiiiiiiiiiiiiiiiiiiiii"<<endl;
-        cout<<block_size2<<endl;
         for(int j=0;j<block_size2;j++){
-            cout<<"sssssssssssssssssssssssssssss"<<endl;
-            cout<<sim_level2.sets_level[y1].blocks_level[y4].data[j]<<endl;
             sim_level2.sets_level[y1].blocks_level[y4].data[j] = data_values_in_block2[j];
-            cout<<"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ"<<endl;
-            cout<<data_values_in_block2[j]<<endl;
-            cout<<"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ"<<endl;
         }
-        cout<<y6<<"                  "<<"}}}}}}}}}}}}}}}}}"<<endl;
+       // cout<<y6<<"                  "<<"}}}}}}}}}}}}}}}}}"<<endl;
         sim_level2.sets_level[y1].blocks_level[y4].data[y6]=value_of_registers[registers_in_present_instruction[0]];
         sim_level2.sets_level[y1].blocks_level[y4].dirty=1;
         lru2++;
@@ -1659,8 +1441,6 @@ int simulator::instruction_memory(int m,int n){
         fun(memory_element_values,m,block_size1,data_values_in_block2);
         for(int j=0;j<block_size2;j++){
             sim_level2.sets_level[y1].blocks_level[b2].data[j] = data_values_in_block2[j];
-            cout<<"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ"<<endl;
-            cout<<data_values_in_block2[j]<<endl;
         }
         sim_level2.sets_level[y1].blocks_level[b2].data[y6]=value_of_registers[registers_in_present_instruction[0]];
         sim_level2.sets_level[y1].blocks_level[b2].dirty=1;
@@ -1683,13 +1463,6 @@ int simulator::instruction_memory(int m,int n){
             }
         }
         cout<<b1<<endl;
-       /* if(sim_level1.sets_level[x1].blocks_level[b1].dirty==1){ // if the block to be replaced in level1 have dirty bit 1
-                // write back to memory
-                cout<<"mmmmmmmmmmmmiiiiiiiiiiiiiissssssssssss"<<endl;
-                int yo = m-(m%block_size1);
-                change_memory(sim_level1,x1,b1,block_size1,yo,memory_element_values);  // write it back to the main memory
-        }*/
-
         int yy = (int)log2(block_size1);
              //string ss1 = bitset<yy>(block_size1).to_string();
              string ss1 = bin(block_size1).substr(32-(yy+1),yy+1);
@@ -1711,13 +1484,10 @@ int simulator::instruction_memory(int m,int n){
                      sim_level2.sets_level[set_index_to_search].blocks_level[f].lru = sim_level1.sets_level[x1].blocks_level[b1].lru;
                  }
              }
-        cout<<"111111111122222222222222233333333333333333333"<<endl;
+       // cout<<"111111111122222222222222233333333333333333333"<<endl;
         vector<int> data_values_in_block;
         fun(memory_element_values,m,block_size1,data_values_in_block);
         for(int j=0;j<block_size1;j++){
-            sim_level1.sets_level[x1].blocks_level[b1].data[j] = data_values_in_block[j];
-            cout<<"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ"<<endl;
-            cout<<data_values_in_block[j]<<endl;
         }
         sim_level1.sets_level[x1].blocks_level[b1].data[x6]=value_of_registers[registers_in_present_instruction[0]];
         sim_level1.sets_level[x1].blocks_level[b1].dirty=1;
@@ -1733,8 +1503,6 @@ int simulator::instruction_memory(int m,int n){
         fun(memory_element_values,m,block_size2,data_values_in_block1);
         for(int j=0;j<block_size2;j++){
             sim_level2.sets_level[y1].blocks_level[y4].data[j] = data_values_in_block1[j];
-            cout<<"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ"<<endl;
-            cout<<data_values_in_block1[j]<<endl;
         }
         sim_level2.sets_level[y1].blocks_level[y4].data[y6]=value_of_registers[registers_in_present_instruction[0]];
         sim_level2.sets_level[y1].blocks_level[y4].dirty=1;
@@ -1787,8 +1555,8 @@ int simulator::instruction_memory(int m,int n){
         fun(memory_element_values,m,block_size1,data_values_in_block2);
         for(int j=0;j<block_size2;j++){
             sim_level2.sets_level[y1].blocks_level[b2].data[j] = data_values_in_block2[j];
-            cout<<"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ"<<endl;
-            cout<<data_values_in_block2[j]<<endl;
+           // cout<<"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ"<<endl;
+           // cout<<data_values_in_block2[j]<<endl;
         }
         sim_level2.sets_level[y1].blocks_level[b2].data[y6]=value_of_registers[registers_in_present_instruction[0]];
         sim_level2.sets_level[y1].blocks_level[b2].dirty=1;
@@ -1798,6 +1566,7 @@ int simulator::instruction_memory(int m,int n){
         }
 
       }
+      clockcycle= clockcycle+(level2_cache_latency+level2_cache_latency+main_mem_latency)-1;
       re = memory_element_values[m];
     }
 
@@ -1808,21 +1577,12 @@ int simulator::instruction_memory(int m,int n){
         cout<<"found in level 2 cache not in level1 cache"<<endl;
         cout<<"--------------------------------------------------------------------"<<endl;
             lru2++;
+            hit++;
           //  sim_level2.sets_level[y1].blocks_level[]
             int y5 = sim_level2.sets_level[y1].req_block_no_in_set_in_level; // as it is hit in level2 increase its lru
-            cout<<y5<<"nnnnnnnnnnnneeeeeeeeeeeeeeeddddddddddddddddddddddddddddddddddd"<<endl;
             int y6 = sim_level2.req_data_position_in_block(sim_level2,address);
-            cout<<y6<<"innnnnnnndddddeeeeeexxxxxxxx"<<endl;
-           // re = sim_level2.sets_level[y1].blocks_level[y5].data[y6];  // getting the required data from level 2 cache
-           // cout<<re<<"           "<<"***************"<<endl;
             sim_level2.sets_level[y1].blocks_level[y5].lru = lru2;
             sim_level2.sets_level[y1].blocks_level[y5].data[y6] = value_of_registers[registers_in_present_instruction[0]];
-           // string ss1 = sim_level2.sets_level[y1].blocks_level[y5].tag;
-           // string ss2 = bitset<13>(x).to_string();
-           // string ss2 = sim_level2.level_index_str;
-           // string ss3 = sim_level2.level_offset_str;
-           // string ss = ss1+ss2+ss3;
-           // int pos_in_memory = (stoi(address,nullptr,2))/4;
         if(x4 != -1){  // if there is empty block we can place the block there
         /////////////////////////// add the block into the null place
         cout<<"----------------------------------------------------------------------------------"<<endl;
@@ -1832,9 +1592,6 @@ int simulator::instruction_memory(int m,int n){
         fun(memory_element_values,m,block_size1,data_values_in_block);
         for(int j=0;j<block_size1;j++){
             sim_level1.sets_level[x1].blocks_level[x4].data[j] = data_values_in_block[j];
-            cout<<"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ11111111111"<<endl;
-            cout<<data_values_in_block[j]<<endl;
-            cout<<"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ11111111111"<<endl;
         }
         if(sim_level1.sets_level[x1].blocks_level[x4].data[x6]!=value_of_registers[registers_in_present_instruction[0]]){
          sim_level1.sets_level[x1].blocks_level[x4].dirty=1;
@@ -1856,12 +1613,6 @@ int simulator::instruction_memory(int m,int n){
                 b1=k;
                 }
             }
-           /* if(sim_level1.sets_level[x1].blocks_level[b1].dirty==1){ // if the block to be replaced in level1 have dirty bit 1
-                // write back to memory
-                int yo = m-(m%block_size1);
-                change_memory(sim_level1,x1,b1,block_size1,yo,memory_element_values);  // write it back to the main memory
-             } */
-
              int yy = (int)log2(block_size1);
              //string ss1 = bitset<yy>(block_size1).to_string();
              string ss1 = bin(block_size1).substr(32-(yy+1),yy+1);
@@ -1888,9 +1639,6 @@ int simulator::instruction_memory(int m,int n){
             fun(memory_element_values,m,block_size1,data_values_in_block);
             for(int j=0;j<block_size1;j++){
             sim_level1.sets_level[x1].blocks_level[b1].data[j] = data_values_in_block[j];
-            cout<<"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ11111111111"<<endl;
-            cout<<data_values_in_block[j]<<endl;
-            cout<<"QQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQQ11111111111"<<endl;
             }
             if(sim_level1.sets_level[x1].blocks_level[b1].data[x6]!=value_of_registers[registers_in_present_instruction[0]]){
             sim_level1.sets_level[x1].blocks_level[b1].dirty=1;
@@ -1901,6 +1649,7 @@ int simulator::instruction_memory(int m,int n){
             sim_level1.sets_level[x1].blocks_level[b1].lru = lru1; 
            // sim_level1.sets_level[x1].blocks_level[b1].dirty=0;
         }
+        clockcycle = clockcycle+(level1_cache_latency+level2_cache_latency)-1;
         } 
 
 
@@ -1911,186 +1660,127 @@ int simulator::instruction_memory(int m,int n){
          cout<<"----------------------------------------------------------------------------------"<<endl;
         cout<<"found in level 1 cache itself "<<endl;
         cout<<"--------------------------------------------------------------------"<<endl;
+        hit++;
          int x5 = sim_level1.sets_level[x1].req_block_no_in_set_in_level; // as it is hit in level2 increase its lru
         cout<<x5<<"nnnnnnnnnnnneeeeeeeeeeeeeeeddddddddddddddddddddddddddddddddddd"<<endl;
         sim_level1.sets_level[x1].blocks_level[x5].data[x6] = value_of_registers[registers_in_present_instruction[0]];
-        //re = sim_level1.sets_level[x1].blocks_level[x5].data[x6];
+        lru1++;
+        sim_level1.sets_level[x1].blocks_level[x5].lru = lru1;
          sim_level1.sets_level[x1].blocks_level[x5].dirty=1;
-        if(found_in_level2!=INT_MAX){
-            int y5 = sim_level2.sets_level[y1].req_block_no_in_set_in_level; // as it is hit in level2 increase its lru
-            cout<<y5<<"nnnnnnnnnnnneeeeeeeeeeeeeeeddddddddddddddddddddddddddddddddddd"<<endl;
-            sim_level2.sets_level[y1].blocks_level[y5].data[y6] = value_of_registers[registers_in_present_instruction[0]];
-             sim_level2.sets_level[y1].blocks_level[y5].dirty=1;
-        }
+         clockcycle = clockcycle + (level1_cache_latency-1);
      }   
-      
-      
-      
-      
-      
-      
-       // return memory_element_values[m];
-    cout<<"iiiiiiinnnnnnnnnstrrrrrrrmmmmmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeemmmmmmmmmmmmmmm"<<endl;
-       //re = memory_element_values[m];
        cout<<m<<endl;
        re = m;
     }
-    else if(n>12 && n<=15){
-        re = memory_element_values[m];
+    else if(n==12){
+       re = m;
+    }
+    else if(n==13 || n==14){
+        re = m;
     }
     else{
-        //return m;
         re = m;
     }         //////////change change
     return re;
 }
 
-void simulator::instruction_writeback(int m,int n){  
-        if(n==12){
-            cout<<"wwwwwwwwrrrrrrrrrbbbbbbbbbbbb111111111111111222222222222222"<<endl;
-            cout<<value_of_registers[registers_in_present_instruction[0]]<<endl;
+void simulator::instruction_writeback(int m,int n){   // write back stage
+// generally we update the values of destination register
+        if(n==12){ 
             memory_element_values[m]=value_of_registers[registers_in_present_instruction[0]];
+        }
+        else if(n==13 || n==14 || n==15){
+
         }
         else
         value_of_registers[registers_in_present_instruction[0]]=m;
 }
 
-int simulator::instruction_execute(int n){
-    cout<<n<<"executeexecute"<<endl;
-
+int simulator::instruction_execute(int n){  // execute function
       int execute_stage_value=-111;
         if(data_forwarding_enabled==false){
-            //cout<<"66666666666666666666666666666666"<<is_there_datahazard(pc-main_found-1)<<endl;
-        int q2 = is_there_datahazard(pc-main_found-1);
-        cout<<"`````````````````````````````````````````````"<<q2<<endl;
-        if(q2!=0){
+        int q2 = is_there_datahazard(pc-main_found-1-number_of_labels_found); // check whether there are hazards
+        if(q2!=0){ // if there is hazard
               instructions_with_stalls.push_back(program[pc-1]);
           }
           clockcycle=clockcycle+q2;
           total_stalls=total_stalls+q2;
-          cout<<clockcycle<<"++++++++++++++++++++++++++++++++++++++++++++++++++++++"<<endl;
         }
         else{
-          int q1 = is_there_datahazard(pc-main_found-1);
-          cout<<"ddddaaaaaaaaatttttaaaaaa"<<q1<<endl;
+          int q1 = is_there_datahazard(pc-main_found-1-number_of_labels_found);
           if(q1!=0){
               instructions_with_stalls.push_back(program[pc-1]);
           }
           clockcycle=clockcycle+q1;
           total_stalls=total_stalls+q1;
-          cout<<clockcycle<<"+++++++++++++++++++++++++++++++++++++++++++++++++++++"<<endl;
         }
 
      switch(n){
-        case 0:
-       
-		//return value_of_registers[registers_in_present_instruction[1]]+value_of_registers[registers_in_present_instruction[2]]; 
+        case 0: // add
          execute_stage_value=value_of_registers[registers_in_present_instruction[1]]+value_of_registers[registers_in_present_instruction[2]]; 
         break;
-        case 1:
-        
-		//return value_of_registers[registers_in_present_instruction[1]]-value_of_registers[registers_in_present_instruction[2]]; 
+        case 1:  //sub
          execute_stage_value=value_of_registers[registers_in_present_instruction[1]]-value_of_registers[registers_in_present_instruction[2]]; 
         
         break;
-        case 2:
-       
-		//return value_of_registers[registers_in_present_instruction[1]]*value_of_registers[registers_in_present_instruction[2]]; 
+        case 2: //mul
          execute_stage_value=value_of_registers[registers_in_present_instruction[1]]*value_of_registers[registers_in_present_instruction[2]]; 
        break;
-        case 3:
-        
-		//return value_of_registers[registers_in_present_instruction[1]] & value_of_registers[registers_in_present_instruction[2]]; 
+        case 3: // div
          execute_stage_value=value_of_registers[registers_in_present_instruction[1]]&value_of_registers[registers_in_present_instruction[2]]; 
         break;
-        case 4:
-        
-		return value_of_registers[registers_in_present_instruction[1]]|value_of_registers[registers_in_present_instruction[2]]; 
+        case 4:  //or
          execute_stage_value=value_of_registers[registers_in_present_instruction[1]]|value_of_registers[registers_in_present_instruction[2]]; 
         break;
         case 5:
 
         break;  /////////////////////////////////////////////////////////////////////////////////////////////
-        case 6:
+        case 6: //slt
             value_of_registers[registers_in_present_instruction[0]]=value_of_registers[registers_in_present_instruction[1]]<value_of_registers[registers_in_present_instruction[2]];
-        break;
-        case 7:
-           
-            cout<<registers_in_present_instruction[0]<<endl;
-            cout<<registers_in_present_instruction[2]<<endl;
-          //  return value_of_registers[registers_in_present_instruction[1]]+registers_in_present_instruction[2];
-          //  pc++;
+        break; 
+        case 7:  //addi
            execute_stage_value=value_of_registers[registers_in_present_instruction[1]]+registers_in_present_instruction[2]; 
             break;
-        case 8:
-            cout<<registers_in_present_instruction[0]<<endl;
-            cout<<registers_in_present_instruction[2]<<endl;
-            //return value_of_registers[registers_in_present_instruction[1]] & registers_in_present_instruction[2];
-           // pc++;
+        case 8: //subi
             execute_stage_value=value_of_registers[registers_in_present_instruction[1]]-registers_in_present_instruction[2]; 
             break;
         break;
-        case 9:
-            cout<<registers_in_present_instruction[0]<<endl;
-            cout<<registers_in_present_instruction[2]<<endl;
-           // return value_of_registers[registers_in_present_instruction[1]] | registers_in_present_instruction[2];
-           // pc++;
+        case 9:  // ori
             execute_stage_value=value_of_registers[registers_in_present_instruction[1]]|registers_in_present_instruction[2]; 
             break;
         break;
         case 10:
 
         break;
-        case 11:
-           
-             cout<<registers_in_present_instruction[0]<<endl;
-              cout<<registers_in_present_instruction[1]<<endl;
-             cout<<registers_in_present_instruction[2]<<endl;
+        case 11: //lw
             execute_stage_value=value_of_registers[registers_in_present_instruction[1]]+registers_in_present_instruction[2]/4; 
         break;
-        case 12:
-            cout<<"11111111112222222222222333333333333333333344444444444444455555555555555555"<<endl;
-             cout<<registers_in_present_instruction[0]<<endl;
-              cout<<registers_in_present_instruction[1]<<endl;
-             cout<<registers_in_present_instruction[2]<<endl;
-           //  return value_of_registers[registers_in_present_instruction[1]]+registers_in_present_instruction[2]/4;
-             //memory_element_values[value_of_registers[registers_in_present_instruction[1]]+registers_in_present_instruction[2]/4]=value_of_registers[registers_in_present_instruction[0]];
-           // return 222;
-          //  pc++; 
+        case 12:  //sw
            execute_stage_value=value_of_registers[registers_in_present_instruction[1]]+registers_in_present_instruction[2]/4;
-           cout<<execute_stage_value<<"            "<<"++++++++++++++++++"<<endl; 
         break;
-        case 13:
+        case 13: //beq
             if(value_of_registers[registers_in_present_instruction[0]]==value_of_registers[registers_in_present_instruction[1]]){
-                pc=registers_in_present_instruction[2]+1;
+                pc=registers_in_present_instruction[2];
+            execute_stage_value = 100;
             }
+            
             else{
-               // pc++;
+               execute_stage_value = 100;
             }
         break;
-        case 14:
-        cout<<"HHHHHHHHHHHHHHHHHHHIIIIIIIIIIIIIIIHHHHHHHHHHHHHHHH"<<endl;
+        case 14: //bne
             if(value_of_registers[registers_in_present_instruction[0]]!=value_of_registers[registers_in_present_instruction[1]]){
                 pc=registers_in_present_instruction[2]+1;
-                cout<<pc<<"PPPPPPPPPPPPPPPPPPPCCCCCCCCCCCCCCCCCCC"<<endl;
             }
             else{
-               // pc++;
-                cout<<pc<<"PPPPPPPPPPPPPPPPPPPCCCCCCCCCCCCCCCCCCC"<<endl;
-                cout<<program[pc]<<endl;
             }
         break;
-        case 15:
+        case 15: //j
             pc = registers_in_present_instruction[0];
+            execute_stage_value = 100;
         break;
-        case 16:
-       
-            cout<<registers_in_present_instruction[0]<<endl;
-            cout<<registers_in_present_instruction[1]<<endl;
-           // value_of_registers[registers_in_present_instruction[0]]=registers_in_present_instruction[1];
-            //cout<<value_of_registers[registers_in_present_instruction[0]]<<endl;
-            //pc++;
-            return registers_in_present_instruction[1];
+        case 16: //la
+            execute_stage_value = registers_in_present_instruction[1];
         break;
         case 17:
 
@@ -2099,28 +1789,23 @@ int simulator::instruction_execute(int n){
     return execute_stage_value;
 }
 
-void simulator::valid_register(string s,int n){
+void simulator::valid_register(string s,int n){ // valid register method
     vector <string> tokens;
     stringstream commas(s);
     string intermediate;
-    while(getline(commas,intermediate,',')){
+    while(getline(commas,intermediate,',')){ // dividing the string by commas
         if(intermediate[0]=='$')
         tokens.push_back(intermediate.substr(1));
         else
         tokens.push_back(intermediate);
     }
     int x=tokens.size();
-    cout<<x<<endl;
-    
-    for(int i=0;i<tokens.size();i++){
-        cout<<tokens[i]<<endl;
-    }
     int y=0;
-    if(n==6 && x==3){
+    if(n==6 && x==3){  //add sub type
             for(int i=0;i<x;i++){
                 for(int j=0;j<32;j++){
                     if(tokens[i]==registers[j]){
-                        registers_in_present_instruction[i]=j;
+                        registers_in_present_instruction[i]=j; //we store the register here
                         y++;
                     }
                 }
@@ -2134,15 +1819,12 @@ void simulator::valid_register(string s,int n){
         for(int i=0;i<2;i++){
             for(int j=0;j<32;j++){
                 if(tokens[i]==registers[j]){
-                    
-                    registers_in_present_instruction[i]=j;
+                         registers_in_present_instruction[i]=j;
                    // cout<<registers_in_present_instruction[i]<<"jjjjjjjjjjjjjjjjjjj"<<endl;
                     y++;
                 }
             }
         }
-        cout<<tokens[2]<<endl;
-        cout<<stoi(tokens[2])<<endl;
         registers_in_present_instruction[2]=stoi(tokens[2]);
         y++;
        
@@ -2154,38 +1836,31 @@ void simulator::valid_register(string s,int n){
     else if(n==12 && x==2){
         type_of_offset lwsw;
          string s1=tokens[1];
-         cout<<s1<<"                 "<<"------------"<<endl;
+        // cout<<s1<<"                 "<<"------------"<<endl;
         int offset=-1;
         int x=s1.find("(");
         char c=s1[0];
         int z=s1.find(")");
         string s2="";
-        
-        if(c=='0' || c=='1' || c=='2' || c=='3' || c=='4'|| c=='5' || c=='6' || c=='7' || c=='8' || c=='9'){
-            cout<<"111111111111111111111111111111111111111111111111111"<<endl;
+        // 2 types we can have register or integer
+        if(c=='0' || c=='1' || c=='2' || c=='3' || c=='4'|| c=='5' || c=='6' || c=='7' || c=='8' || c=='9'){ // if integer
            offset=stoi(s1.substr(0,x));
-           //cout<<offset<<">>>>>>>>>>>>>>>>>>"<<endl;
            lwsw.position=pc-1;
            lwsw.type=1;
            lwsw_offset_info.push_back(lwsw);
           s2=s1.substr(x+2,z-x-2);
          
         }
-        else{
-           cout<<"222222222222222222222222222222222222222222222222222222"<<endl;
-            cout<<s1<<endl;
-            cout<<x<<endl;
-            cout<<z<<endl;
-           // s2=s1.substr(x+2,z-x-2);
+        else{ //register type
            s2=s1.substr(0,2);
-            cout<<s2<<"ssssssss22222222"<<endl;
+          //  cout<<s2<<"ssssssss22222222"<<endl;
             lwsw.position=pc-1;
             lwsw.type=0;
             lwsw_offset_info.push_back(lwsw);
             for(int i=0;i<32;i++){
                 if(s2==registers[i]){
                     offset=value_of_registers[i];
-                   cout<<offset<<"??????????????????????"<<endl;
+                  // cout<<offset<<"??????????????????????"<<endl;
                     break;
                 }
             }
@@ -2207,16 +1882,13 @@ void simulator::valid_register(string s,int n){
             cout<<"wrong offset value";
         }
         registers_in_present_instruction[2]=offset;
-        cout<<registers_in_present_instruction[0]<<endl;
-        cout<<registers_in_present_instruction[1]<<endl;
-        cout<<registers_in_present_instruction[2]<<endl;
-      
         if(y!=2){
         cout<<"wrong"<<endl;
         }
    
     }
     else if(n==14 && x==3){
+       // cout<<"bbbbbbbbbbbbeeeeeeeeeeeeqqqqqqqqqqqqqqbbbbbbbbbbbbbnnnnnnnnnnnnneeeeeeeeeeeeeeee"<<endl;
         for(int i=0;i<2;i++){
             for(int j=0;j<32;j++){
                 if(tokens[i]==registers[j]){
@@ -2235,13 +1907,17 @@ void simulator::valid_register(string s,int n){
                 found=1;
             }
         }
+        cout<<"--------------------------------------------------"<<endl;
+        for(int i=0;i<3;i++){
+            cout<<registers_in_present_instruction[i]<<endl;
+        }
+        cout<<"--------------------------------------------------"<<endl;
         if(found==0){
             cout<<"wrong label name written";
         }
 
     }
     else if(n==15){
-        string s=tokens[0];
         int found=0;
         for(int i=0;i<labels_in_program.size();i++){
             if(s==labels_in_program[i].label){
@@ -2249,6 +1925,7 @@ void simulator::valid_register(string s,int n){
                 found=1;
             }
         }
+        cout<<"vvvvvvvaaaaaaallllliiiiiiiiiddddddiiiiiitttttttttttyyyyyyyyyyy"<<endl;
         if(found==0){
             cout<<"wrong label name is written";
         }
@@ -2277,38 +1954,31 @@ void simulator::valid_register(string s,int n){
         }
 }
 
-void simulator::display(){
+void simulator::display(){ // display function
      for(int i=0;i<32;i++){
          cout<<registers[i]<<"  "<<value_of_registers[i]<<endl;
      }
-     cout<<"stalls in program"<<total_stalls;
-     cout<<"clockcycles taken"<<clockcycle+3;
+     cout<<"stalls in program"<<total_stalls<<endl;
+     cout<<"clockcycles taken"<<clockcycle+3<<endl;
     cout<<data_forwarding_enabled<<endl;
     cout<<"......................................."<<endl;
+    cout<<"========          "<<"instructions with satlls           "<<"=========="<<endl;
     for(int b=0;b<instructions_with_stalls.size();b++){
         cout<<instructions_with_stalls[b]<<endl;
     }
-    cout<<"1111111111111111111111111111111111111111111111111111111111111111111111111111"<<endl;
-    for(int i=0;i<32;i++){
-        cout<<&registers[i]<<endl;
-        
-    }
-    cout<<"11111111111111111111111111111111111111111111111111111111111111111111111111111"<<endl; 
+    cout<<"==========        "<<"hit rate              "<<"============="<<endl;
+    float hitrate = (float)(hit)/(float)(lwsw_ins);
+    cout<<hitrate<<endl;
+    cout<<"==========        "<<"instructions per cycle           "<<"==========="<<endl;
+    cout<<number_of_instructions_executed<<endl;
+    cout<<clockcycle<<endl;
+    cout<<(float)(number_of_instructions_executed)/clockcycle;
 }
-
-// '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-// '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-// '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-// '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-// '''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
-
 // we have 4kb memory so 4096 so 12 bits requireed to store addresses
-
 int main(){
     ifstream file;
     int need;
     cout<<"need data forwarding 1/0";
-//////////////////////////////////////////////////////////////////////////////////
     int cache_size = 8;
     int block_size = 2;
     int assosciativity = 2;
@@ -2316,12 +1986,13 @@ int main(){
     int block_size_2 = 2;
     int assosciativity_2 = 2;
     Cache level1 = design_level_cache(cache_size,block_size,assosciativity);
-   // display_cache(level1);
     Cache level2 = design_level_cache(cache_size_2,block_size_2,assosciativity_2);
-   // display_cache_level2(level2);
+    int cache_latency1;
+    int cache_latency2;
+    int main_memory_latency;
 //////////////////////////////////////////////////////////////////////////////////    
     cin>>need;
-     simulator s(file,need,level1,level2,block_size,block_size_2);
+     simulator s(file,need,level1,level2,block_size,block_size_2,cache_latency1,cache_latency2,main_memory_latency);
      s.run();
      s.display();
      cout<<need<<endl;
